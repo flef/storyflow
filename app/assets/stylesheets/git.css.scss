@@ -1,4 +1,4 @@
-$margin: 10px;
+$margin: 0px;
 
 body {
   margin: 0;
@@ -19,7 +19,7 @@ body {
 .commit_block {
   width: 500px;
   float: left;
-  margin-left: 10px;
+  margin-left: $margin;
 }
 
 pre[class*='language-'] > code[data-language] {

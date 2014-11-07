@@ -1,7 +1,14 @@
 <div id="commit_block_container">
-  <% @blobs.each do |b| %>
+  <% @data.each do |blob, blame| %>
    <div class="commit_block">
-      <pre class="git-lines language-ruby"><code><%= b.data.strip %></code></pre>
+      <pre class="git-lines language-ruby"><code><%= blob.data.strip %></code></pre>
     </div>
+    <% blame.each do |blame| %>
+      <% logger.info blame %>
+      <%#= commit %>
+      <%#= lines %>
+    <% end %>
+
+      
   <% end %>
 </div>
