@@ -28,7 +28,9 @@ gem 'spring',        group: :development
 
 gem 'thin'
 
-gem 'rugged'
+#gem 'rugged'
+
+gem 'gitlab_git', github: 'gitlabhq/gitlab_git'
 
 # Use ActiveModel has_secure_password
 # gem 'bcrypt', '~> 3.1.7'

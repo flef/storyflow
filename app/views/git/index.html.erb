@@ -1,1 +1,7 @@
-<%= @blame %>
+<div id="commit_block_container">
+  <% @blobs.each do |b| %>
+   <div class="commit_block">
+      <pre class="git-lines language-cpp"><code><%= b.data.strip %></code></pre>
+    </div>
+  <% end %>
+</div>

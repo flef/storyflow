@@ -1,3 +1,36 @@
-// Place all the styles related to the git controller here.
-// They will automatically be included in application.css.
-// You can use Sass (SCSS) here: http://sass-lang.com/
+$margin: 10px;
+
+body {
+  margin: 0;
+}
+
+#commit_block_container {
+  width: 10000px;
+  /*-webkit-transition: all 0.5s ease;*/
+  /*transform: scale(0.3, 0.3);*/
+  /*transform-origin: 0 0 0;*/
+  /*transform: */
+}
+
+/*#commit_block_container:hover {*/
+  /*transform: scale(1, 1);*/
+/*}*/
+
+.commit_block {
+  width: 500px;
+  float: left;
+  margin-left: 10px;
+}
+
+pre[class*='language-'] > code[data-language] {
+  max-height: none;
+  white-space: pre;
+  word-wrap: break-word;
+  font-size: 9px;
+}
+
+pre[class*='language-'] {
+  margin: 0;
+  margin-top: $margin
+
+}
