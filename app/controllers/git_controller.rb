@@ -1,5 +1,7 @@
-FolderPath = "/Users/deity/programming/hcil_rails"
-FilePath = 'app/admin/person.rb'
+#FolderPath = "/Users/deity/programming/hcil_rails"
+#FilePath = 'app/admin/person.rb'
+FolderPath = "."
+FilePath = 'app/controllers/git_controller.rb'
 
 class GitController < ApplicationController
   def index
@@ -11,6 +13,11 @@ class GitController < ApplicationController
       path: FilePath
     })
 
-    @blobs = commits.map { |c| Gitlab::Git::Blob.find(repo, c.id, FilePath) }.reverse
+    @data = commits.map do |c|
+      blob = Gitlab::Git::Blob.find(repo, c.id, FilePath) 
+      blame = Gitlab::Git::Blame.new(repo, c.id, FilePath)
+      [blob, blame]
+    end.reverse
+
   end
 end
