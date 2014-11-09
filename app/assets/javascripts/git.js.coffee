@@ -1,6 +1,8 @@
 $ ->
   Prism.hooks.add 'after-highlight', (env) ->
     pre = env.element.parentNode
+    data = $(pre.parentNode).children(".blame-data").data("blame")
+    console.log data
 
     return if (!pre || !/pre/i.test(pre.nodeName) || pre.className.indexOf('git-lines') is -1)
 
@@ -9,7 +11,7 @@ $ ->
     lines = new Array(linesNum)
     lines = lines.join("<span></span>")
 
-    console.log lines
+    #console.log lines
 
     lineNumbersWrapper = document.createElement('span')
     lineNumbersWrapper.className = 'line-numbers-rows'

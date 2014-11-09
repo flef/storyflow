@@ -15,8 +15,9 @@ class GitController < ApplicationController
 
     @data = commits.map do |c|
       blob = Gitlab::Git::Blob.find(repo, c.id, FilePath) 
-      blame = Gitlab::Git::Blame.new(repo, c.id, FilePath).instance_variable_get :@blame
-      [blob, blame]
+      blame = Rugged::Blame.new(repo.rugged, FilePath, { newest_commit: c.id })
+      #blame = Gitlab::Git::Blame.new(repo, c.id, FilePath).instance_variable_get :@blame
+      [c, blob, blame]
     end.reverse
 
   end
