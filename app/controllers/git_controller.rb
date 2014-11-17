@@ -1,7 +1,7 @@
 #FolderPath = "/Users/deity/programming/hcil_rails"
 #FilePath = 'app/admin/person.rb'
 FolderPath = "."
-FilePath = 'app/controllers/git_controller.rb'
+FilePath = 'app/views/git/index.html.erb'
 
 class GitController < ApplicationController
   def index

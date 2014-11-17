@@ -1,26 +1,18 @@
 <div id="commit_block_container">
   <% @data.each do |commit, blob, blame| %>
     <div class="commit_block">
-      <div class="commit-info" style="background-color: #<%= commit.id[12..17] %>" > <%= commit.id[0...7] %> - <%= commit.message %> </div>
+      <div class="commit-info" style="background-color: #<%= commit.id[12..17] %>" > <%= commit.id[0...7] %> - <%= commit.message[0..50] %> </div>
 	  <div class="blame-data" data-blame="<%= blame.to_json %>"> </div> 	
 		<% blame.each do |b| %>
-		<% deb = b[:final_start_line_number] %>
+		<% deb = b[:final_start_line_number] -1 %>
 		<% fin = deb + b[:lines_in_hunk] - 1   %>
-			<hr/> 
-			<font color="#<%= b[:final_commit_id][4..9] %>">
-			<code style="background-color: #<%= b[:orig_commit_id][12..17] %>" title="<%= b[:final_signature][:name]%>"><%= blob.data.strip.lines[deb..fin].join("").sub("\n","<br/>").html_safe %></code>
-			</font>
+			<hr/>
+		<% blob.data.lines[deb..fin].each do |line| %>
+			<code style="background-color: #<%= b[:orig_commit_id][12..17] %>" title="<%= b[:orig_signature][:name] %> &#8594; <%= b[:final_signature][:name]%>"><%= line.strip %></code>
+			<br>
+		<% end %> 
 		<%end%>
     </div>
   <% end %>
 </div>
 
-<div id="commit_block_container">
-  <% @data.each do |commit, blob, blame| %>
-    <div class="commit_block">
-      <div class="commit-info"> <%= commit.id[0...7] %> - <%= commit.message %> </div>
-      <div class="blame-data" data-blame="<%= blame.to_json %>"> </div> 
-      <pre class="git-lines language-ruby"><code><%= blob.data.strip %></code></pre>
-    </div>
-  <% end %>
-</div>
