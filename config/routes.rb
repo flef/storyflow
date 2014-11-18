@@ -7,7 +7,7 @@ Rails.application.routes.draw do
    root 'git#index'
 
    get 'data' => 'git#data'
-
+   get 'rawdata' => 'git#rawdata'
   # Example of regular route:
   #   get 'products/:id' => 'catalog#view'
 

@@ -68,7 +68,7 @@ var data = JSON.parse('<%= @infos.to_json.html_safe %>');
 console.log(data);
 
 
-function compute(energy) {
+d3.json('http://localhost:3000/rawdata.json', function (energy) {
 
   sankey
       .nodes(energy.nodes)
@@ -124,7 +124,6 @@ function compute(energy) {
     sankey.relayout();
     link.attr("d", path);
   }
-}
+});
 
-compute(data);
 </script>
