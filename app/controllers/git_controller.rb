@@ -52,9 +52,12 @@ class GitController < ApplicationController
           table[cIndex][b[:final_commit_id][0..7]] = Array.new 
         end
 
-        table[cIndex][b[:final_commit_id][0..7]]  << nodeID 
+        table[cIndex][b[:final_commit_id][0..7]]  << nodeID
+
+        startLine = b[:final_start_line_number] - 1
+        endLine   = startLine + b[:lines_in_hunk] - 1 
   
-        node << {:author => b[:final_signature][:name], :commit => b[:final_commit_id][0..7], :name   => "c_" + cIndex.to_s + "_b_" + bIndex.to_s }
+        node << {:content => blob.data.lines[startLine..endLine].join("\n") ,:author => b[:final_signature][:name], :commit => b[:final_commit_id][0..7], :name   => "c_" + cIndex.to_s + "_b_" + bIndex.to_s }
         linesInHunk[nodeID] = b[:lines_in_hunk]
 
         nodeID += 1
@@ -64,10 +67,10 @@ class GitController < ApplicationController
         aLink.each do |destination|
           if commitID != c.id[0..7]
               table[cIndex-1][commitID].each do |source|
-                link << {:source => destination, :target => source, :value => linesInHunk[destination] * 50 }
+                link << {:source => destination, :target => source, :value => linesInHunk[destination] }
               end
            elsif prevCommit != nil
-              link << {:source => destination, :target => table[cIndex-1][prevCommit].first, :value => 1 }
+              link << {:source => destination, :target => table[cIndex-1][prevCommit].first, :value => 0 }
           end
         end
       end

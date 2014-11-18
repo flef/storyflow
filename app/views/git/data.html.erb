@@ -16,7 +16,7 @@
 
 .node text {
   pointer-events: none;
-  text-shadow: 0 1px 0 #fff;
+  color: #FFFFFF;
 }
 
 .link {
@@ -45,7 +45,7 @@
 <script>
 var margin = {top: 1, right: 1, bottom: 6, left: 1},
     width = 5000 - margin.left - margin.right,
-    height = 800 - margin.top - margin.bottom;
+    height = 1200 - margin.top - margin.bottom;
 
 var formatNumber = d3.format(",.0f"),
     format = function(d) { return formatNumber(d) + " TWh"; },
@@ -64,11 +64,9 @@ var sankey = d3.sankey()
 
 var path = sankey.link();
 
-var data = JSON.parse('<%= @infos.to_json.html_safe %>');
-console.log(data);
-
 
 d3.json('http://localhost:3000/rawdata.json', function (energy) {
+  console.log(energy);
 
   sankey
       .nodes(energy.nodes)
@@ -109,15 +107,16 @@ d3.json('http://localhost:3000/rawdata.json', function (energy) {
       .text(function(d) { return d.author; });
 
   node.append("text")
-      .attr("x", -6)
-      .attr("y", function(d) { return d.dy / 2; })
+      .attr("y", function(d) { return 10 ; })
       .attr("dy", ".35em")
-      .attr("text-anchor", "end")
+      .style("font-size", "5px")
       .attr("transform", null)
-      .text(function(d) { return d.name; })
-    .filter(function(d) { return d.x < width / 2; })
-      .attr("x", 6 + sankey.nodeWidth())
+      .text(function(d) { return d.content; })
+      .attr("x", 6 )
       .attr("text-anchor", "start");
+
+  node.selectAll("text")
+      .call(wrap, sankey.nodeWidth());
 
   function dragmove(d) {
     d3.select(this).attr("transform", "translate(" + d.x + "," + (d.y = Math.max(0, Math.min(height - d.dy, d3.event.y))) + ")");
@@ -126,4 +125,21 @@ d3.json('http://localhost:3000/rawdata.json', function (energy) {
   }
 });
 
+
+function wrap(text, width) {
+  text.each(function() {
+    var text = d3.select(this),
+        lines = text.text().split(/\n/),
+        line,
+        lineHeight = 0.55, // em
+        y = text.attr("y"),
+        dy = parseFloat(text.attr("dy"));
+        text.text(null);
+    lines.forEach (function(line, lineNumber){
+      tab = line.match(/\t/g) ;
+      text.append("tspan").attr("x", 0).attr("y", y).attr("dy", lineNumber * lineHeight + dy + "em").attr("text-indent", tab).text(line);
+      });
+    });
+}
+// http://bl.ocks.org/mbostock/7555321
 </script>
