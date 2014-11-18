@@ -1,7 +1,7 @@
 #FolderPath = "/Users/deity/programming/hcil_rails"
 #FilePath = 'app/admin/person.rb'
 FolderPath = "."
-FilePath = 'app/views/git/data.html.erb'
+FilePath = 'app/views/git/index.html.erb'
 
 class GitController < ApplicationController
   def index
@@ -57,7 +57,7 @@ class GitController < ApplicationController
         startLine = b[:final_start_line_number] - 1
         endLine   = startLine + b[:lines_in_hunk] - 1      
         
-        node << {:x => cIndex, :row => bIndex, :value => b[:lines_in_hunk], :content => blob.data.lines[startLine..endLine].join("\n") ,:author => "c_" + cIndex.to_s + "_b_" + bIndex.to_s, :commit => b[:final_commit_id][0..7], :name   => "c_" + cIndex.to_s + "_b_" + bIndex.to_s }
+        node << {:x => cIndex, :row => bIndex, :value => b[:lines_in_hunk], :content => blob.data.lines[startLine..endLine].join("\n") ,:author => "c_" + cIndex.to_s + "_b_" + bIndex.to_s + ":" + b[:lines_in_hunk].to_s, :commit => b[:final_commit_id][0..7], :name   => "c_" + cIndex.to_s + "_b_" + bIndex.to_s }
         linesInHunk[nodeID] = b[:lines_in_hunk]
 
         
@@ -71,11 +71,9 @@ class GitController < ApplicationController
           if commitID != c.id[0..7]
               table[cIndex-1][commitID].each do |source|
                 if (destination.last[:final_start_line_number] - source.last[:orig_start_line_number]).abs < source.last[:lines_in_hunk]
-                  link << {:source => source.first, :target => destination.first, :value => destination.last[:lines_in_hunk]}#, :debug => [source.last, destination.last]}
+                  link << {:source => source.first, :target => destination.first, :source_line => destination.last[:orig_start_line_number] - 1 , :target_line => destination.last[:final_start_line_number] - 1,:value => destination.last[:lines_in_hunk]}#, :debug => [source.last, destination.last]}
                 end
               end
-           elsif prevCommit != nil
-              #link << {:source => destination.first, :target => table[cIndex-1][prevCommit].first.first, :value => 0 }
           end
         end
       end

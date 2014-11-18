@@ -59,7 +59,7 @@ var svg = d3.select("#chart").append("svg")
 
 var sankey = d3.sankey()
     .nodeWidth(400)
-    .nodePadding(2)
+    .nodePadding(0)
     .size([width, height]);
 
 var path = sankey.link();
@@ -107,9 +107,9 @@ d3.json('http://localhost:3000/rawdata.json', function (energy) {
       .text(function(d) { return d.author; });
 
   node.append("text")
-      .attr("y", function(d) { return 10 ; })
+      .attr("y", function(d) { return 5; })
       .attr("dy", ".35em")
-      .style("font-size", "5px")
+      .style("font-size", sankey.textsize() + "px")
       .attr("transform", null)
       .text(function(d) { return d.content; })
       .attr("x", 6 )
@@ -127,16 +127,28 @@ d3.json('http://localhost:3000/rawdata.json', function (energy) {
 
 
 function wrap(text, width) {
+  // nbVhar writable per line
+  nbChar = 1.75 * sankey.nodeWidth() / sankey.textsize() - 5;
+
+
   text.each(function() {
     var text = d3.select(this),
         lines = text.text().split(/\n/),
         line,
-        lineHeight = 0.55, // em
+        lineHeight = 0.5, // em
         y = text.attr("y"),
         dy = parseFloat(text.attr("dy"));
         text.text(null);
+
+
     lines.forEach (function(line, lineNumber){
-      tab = line.match(/\t/g) ;
+      tab = line.match(/\t/g);
+      
+      if(line.length > nbChar) {
+        line = line.substr(0, nbChar);
+        line += "...";
+      }
+      
       text.append("tspan").attr("x", 0).attr("y", y).attr("dy", lineNumber * lineHeight + dy + "em").attr("text-indent", tab).text(line);
       });
     });
