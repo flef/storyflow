@@ -38,7 +38,6 @@ d3.sankey = function() {
 
   sankey.layout = function(iterations) {
     computeNodeLinks();
-    computeNodeValues();
     computeNodeBreadths();
     computeNodeDepths(iterations);
     computeLinkDepths();
@@ -93,64 +92,20 @@ d3.sankey = function() {
     });
   }
 
-  // Compute the value (size) of each node by summing the associated links.
-  function computeNodeValues() {
-    nodes.forEach(function(node) {
-      node.value = Math.max(
-        d3.sum(node.sourceLinks, value),
-        d3.sum(node.targetLinks, value)
-      );
-    });
-  }
 
   // Iteratively assign the breadth (x-position) for each node.
   // Nodes are assigned the maximum breadth of incoming neighbors plus one;
   // nodes with no incoming links are assigned breadth zero, while
   // nodes with no outgoing links are assigned the maximum breadth.
   function computeNodeBreadths() {
-    var remainingNodes = nodes,
-        nextNodes,
-        x = 0;
-
-    while (remainingNodes.length) {
-      nextNodes = [];
-      remainingNodes.forEach(function(node) {
-        node.x = x;
-        node.dx = nodeWidth;
-        node.sourceLinks.forEach(function(link) {
-          if (nextNodes.indexOf(link.target) < 0) {
-            nextNodes.push(link.target);
-          }
-        });
-      });
-      remainingNodes = nextNodes;
-      ++x;
-    }
-
-    //
-    moveSinksRight(x);
+    var x = d3.max(nodes, function(d){ return d.x });
     scaleNodeBreadths((size[0] - nodeWidth) / (x - 1));
-  }
-
-  function moveSourcesRight() {
-    nodes.forEach(function(node) {
-      if (!node.targetLinks.length) {
-        node.x = d3.min(node.sourceLinks, function(d) { return d.target.x; }) - 1;
-      }
-    });
-  }
-
-  function moveSinksRight(x) {
-    nodes.forEach(function(node) {
-      if (!node.sourceLinks.length) {
-        node.x = x - 1;
-      }
-    });
   }
 
   function scaleNodeBreadths(kx) {
     nodes.forEach(function(node) {
       node.x *= kx;
+      node.dx = nodeWidth
     });
   }
 
@@ -164,12 +119,6 @@ d3.sankey = function() {
     //
     initializeNodeDepth();
     resolveCollisions();
-    for (var alpha = 1; iterations > 0; --iterations) {
-      relaxRightToLeft(alpha *= .99);
-      resolveCollisions();
-      relaxLeftToRight(alpha);
-      resolveCollisions();
-    }
 
     function initializeNodeDepth() {
       var ky = d3.min(nodesByBreadth, function(nodes) {
