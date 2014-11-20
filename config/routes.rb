@@ -4,10 +4,10 @@ Rails.application.routes.draw do
   # See how all your routes lay out with "rake routes".
 
   # You can have the root of your site routed with "root"
-   root 'git#index'
+   root 'git#data'
 
    get 'data' => 'git#data'
-   get 'rawdata' => 'git#rawdata'
+   #get 'rawdata' => 'git#rawdata'
   # Example of regular route:
   #   get 'products/:id' => 'catalog#view'
 
