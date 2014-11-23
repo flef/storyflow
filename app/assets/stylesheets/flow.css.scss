@@ -1,6 +1,59 @@
-#chart {
-  height: 500px;
+$sidebar_width: 200px;
+$commit_block_width: 300px;
+
+html, body {
+  height: 100%;
+  margin: 0;
 }
+
+#container {
+  height: 100%;
+}
+
+#sidebar {
+  height: 100%;
+  background-color: gray;
+  width: $sidebar_width;
+  float: left;
+}
+
+#chart {
+  width: calc(100% - 200px);
+  height: 100%;
+
+  float: left;
+  overflow: auto;
+  white-space: nowrap;
+}
+
+.author_info {
+  height: 70px;
+  border: 1px solid black;
+  box-sizing: border-box;
+
+}
+
+.blame_commit_block {
+  vertical-align: top;
+  display: inline-block;
+  width: $commit_block_width;
+  margin-right: 50px;
+}
+
+.hidden {
+  display: none;
+}
+
+.code_block {
+  overflow: hidden;
+  pre {
+    margin: 0;
+    font-size: 12px;
+  }
+}
+
+
+
 
 .node rect {
   cursor: move;

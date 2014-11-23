@@ -11,7 +11,5 @@
  * file per style scope.
  *
  *= require_self
- *= require prism
- *= require git
  *= require flow
  */
