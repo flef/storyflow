@@ -1,5 +1,6 @@
 class CommitBlock
   constructor: (@blame_data) ->
+    #console.log @blame_data
   
   getHTML: ->
     commit_block = (html) ->
@@ -24,7 +25,7 @@ class CommitBlock
 
 class AuthorBlock
   constructor: (@author_name, @commit_data) ->
-    console.log @author_name, @commit_data
+    #console.log @author_name, @commit_data
 
   getHTML: ->
     author_block = (html) =>
@@ -35,11 +36,14 @@ class AuthorBlock
         #{html}
       </div>"
 
-    commit_block = (html) ->
-      "<div class='author_commit_block hidden'>#{html}</div>"
+    commit_block = (commit_id, html) ->
+      #"<div class='author_commit_block hidden'>#{html}</div>"
+      "<div class='author_commit_block commit_#{commit_id}'>
+      #{html}
+      #</div>"
 
     commits = @commit_data.map (commit) ->
-      commit_block("#{commit.id.substr(0, 6)}: #{commit.message}")
+      commit_block(commit.id.substr(0, 6), "#{commit.id.substr(0, 6)}: #{commit.message}")
 
     return author_block(commits.join(""))
 
@@ -47,10 +51,18 @@ class Controller
   commit_blocks: []
   author_blocks: []
 
-  constructor: ->
-    @getData()
+  make_smaller: ->
+    window_size = $("#chartContainer").width()
+    chart_size = $("#chart")[0].scrollWidth
 
-  getData: ->
+    $(".code_block > pre").css("visibility", "hidden")
+    $("#chart").transit({scale: window_size / chart_size})
+
+  make_larger: ->
+    $(".code_block > pre").css("visibility", "")
+    $("#chart").transit({scale: 1})
+
+  constructor: ->
     d3.json 'http://localhost:3000/data.json', (data) =>
       #console.log data
       
@@ -61,6 +73,8 @@ class Controller
         @author_blocks.push(new AuthorBlock(author, commits))
 
       @putHTML()
+      #@make_smaller()
+
 
   putHTML: ->
     @commit_blocks.forEach (c) ->
@@ -70,4 +84,4 @@ class Controller
       $("#sidebar").append(a.getHTML())
 
 $ ->
-  controller = new Controller
+  window.controller = new Controller

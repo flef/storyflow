@@ -14,10 +14,11 @@ html, body {
   height: 100%;
   background-color: gray;
   width: $sidebar_width;
+  overflow: auto;
   float: left;
 }
 
-#chart {
+#chartContainer {
   width: calc(100% - 200px);
   height: 100%;
 
@@ -26,11 +27,22 @@ html, body {
   white-space: nowrap;
 }
 
-.author_info {
-  height: 70px;
+#chart {
+  transform-origin: 0 0;
+}
+
+.author_block {
   border: 1px solid black;
   box-sizing: border-box;
+}
 
+.author_info {
+  height: 70px;
+}
+
+.author_commit_block {
+  border: 1px solid black;
+  height: 70px;
 }
 
 .blame_commit_block {
