@@ -1,3 +1,7 @@
+class Util
+  @generateColor: (commit_id) ->
+    return "#{commit_id.substr(0, 6)}"
+
 class CommitBlock
   constructor: (@blame_data) ->
     #console.log @blame_data
@@ -8,7 +12,7 @@ class CommitBlock
 
     blame_block = (commit_id, html) ->
       "<div class='blame_block commit_#{commit_id}' 
-        style='background-color: ##{commit_id.substr(0, 6)}'>
+        style='background-color: ##{Util.generateColor(commit_id)}'>
         #{html}
       </div>"
 
@@ -40,7 +44,7 @@ class AuthorBlock
       #"<div class='author_commit_block hidden'>#{html}</div>"
       "<div class='author_commit_block commit_#{commit_id}'>
       #{html}
-      #</div>"
+      </div>"
 
     commits = @commit_data.map (commit) ->
       commit_block(commit.id.substr(0, 6), "#{commit.id.substr(0, 6)}: #{commit.message}")
@@ -52,15 +56,23 @@ class Controller
   author_blocks: []
 
   make_smaller: ->
-    window_size = $("#chartContainer").width()
-    chart_size = $("#chart")[0].scrollWidth
+    window_width = $("#chartContainer").width()
+    window_height = $("#chartContainer").height()
+    chart_width = $("#chart")[0].scrollWidth
+    chart_height = $("#chart")[0].scrollHeight
 
+    $("#chartContainer").removeClass("larger_view")
     $(".code_block > pre").css("visibility", "hidden")
-    $("#chart").transit({scale: window_size / chart_size})
+    $("#chart").transit
+      scaleX: (window_width / chart_width)
+      scaleY: (window_height / chart_height)
 
   make_larger: ->
+    $("#chartContainer").addClass("larger_view")
     $(".code_block > pre").css("visibility", "")
-    $("#chart").transit({scale: 1})
+    $("#chart").transit
+      scaleX: 1
+      scaleY: 1
 
   constructor: ->
     d3.json 'http://localhost:3000/data.json', (data) =>
@@ -73,8 +85,7 @@ class Controller
         @author_blocks.push(new AuthorBlock(author, commits))
 
       @putHTML()
-      #@make_smaller()
-
+      @make_smaller()
 
   putHTML: ->
     @commit_blocks.forEach (c) ->

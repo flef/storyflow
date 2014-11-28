@@ -1,7 +1,8 @@
-#FolderPath = "/Users/deity/programming/hcil_rails"
 FolderPath = "."
 FilePath = 'app/controllers/git_controller.rb'
-#FilePath = 'app/views/git/index.html.erb'
+
+#FolderPath = "/Users/deity/jquery.transit"
+#FilePath = 'jquery.transit.js'
 
 class GitController < ApplicationController
   def raw_data
@@ -33,8 +34,7 @@ class GitController < ApplicationController
       end
     end
 
-    author_data = commits.group_by { |c| c.author_name }
-
+    author_data = commits.group_by { |c| c.author_name } 
     {blame_data: blame_data, author_data: author_data}
   
     #commits.reverse.each_with_index do |c, cIndex|
