@@ -1,8 +1,8 @@
-#FolderPath = "."
-#FilePath = 'app/controllers/git_controller.rb'
+FolderPath = "."
+FilePath = 'app/controllers/git_controller.rb'
 
-FolderPath = "/Users/deity/jquery.transit"
-FilePath = 'jquery.transit.js'
+#FolderPath = "/Users/deity/jquery.transit"
+#FilePath = 'jquery.transit.js'
 
 #FolderPath= "/Users/deity/2048/"
 #FilePath = "js/game_manager.js"
@@ -17,20 +17,21 @@ class GitController < ApplicationController
       path: FilePath
     })
 
-    blame_data = commits.reverse.map do |c|
+    blame_data = commits.reverse.each_with_index.map do |c, commit_i|
       blob = Gitlab::Git::Blob.find(repo, c.id, FilePath) 
       blame = Rugged::Blame.new(repo.rugged, FilePath, { newest_commit: c.id })
 
       total_line_count = 0
 
-      blame_content_array = blame.map do |b|
+      blame_content_array = blame.each_with_index.map do |b, blame_i|
         startLine = b[:final_start_line_number] - 1
         endLine  = startLine + b[:lines_in_hunk] - 1      
         total_line_count += b[:lines_in_hunk]
 
         #b
         { 
-          content: blob.data.lines[startLine..endLine].each { |l| l.delete!("\n") },
+          #content: blob.data.lines[startLine..endLine].each { |l| l.delete!("\n") },
+          blame_id: "#{commit_i}_#{blame_i}",
           commit_id: b[:orig_commit_id][0..7],
           final_line: b[:final_start_line_number],
           orig_line: b[:orig_start_line_number],

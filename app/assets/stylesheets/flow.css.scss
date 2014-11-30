@@ -43,6 +43,15 @@ html, body {
   box-sizing: border-box;
   float: left;
 
+  /*#chartContainer {*/
+    /*height: 100%;*/
+    /*white-space: nowrap;*/
+
+    /*#chart {*/
+      /*transform-origin: 0 0;*/
+    /*}*/
+  /*}*/
+
   #top_part {
     height: calc(100% - #{$history_flow_height});
   }
@@ -55,14 +64,9 @@ html, body {
       opacity: 0.3;
     }
 
-    /*#chartContainer {*/
-      /*height: 100%;*/
-      /*white-space: nowrap;*/
-
-      /*#chart {*/
-        /*transform-origin: 0 0;*/
-      /*}*/
-    /*}*/
+    .hidden_blame_block {
+      display: none;
+    }
   }
 }
 
