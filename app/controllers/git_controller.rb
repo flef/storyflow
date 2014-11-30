@@ -1,8 +1,8 @@
-FolderPath = "."
-FilePath = 'app/controllers/git_controller.rb'
+#FolderPath = "."
+#FilePath = 'app/controllers/git_controller.rb'
 
-#FolderPath = "/Users/deity/jquery.transit"
-#FilePath = 'jquery.transit.js'
+FolderPath = "/Users/deity/jquery.transit"
+FilePath = 'jquery.transit.js'
 
 #FolderPath= "/Users/deity/2048/"
 #FilePath = "js/game_manager.js"

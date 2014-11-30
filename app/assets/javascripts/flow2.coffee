@@ -16,7 +16,7 @@ class HistoryFlow
       .attr("width", WIDTH)
       .attr("height", HEIGHT)
 
-    d3.json "/data.json", (error, data) =>
+    d3.json "/data_test.json", (error, data) =>
       console.log data
       
       for d in data.blame_data
