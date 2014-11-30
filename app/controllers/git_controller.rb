@@ -4,6 +4,9 @@ FilePath = 'app/controllers/git_controller.rb'
 #FolderPath = "/Users/deity/jquery.transit"
 #FilePath = 'jquery.transit.js'
 
+#FolderPath= "/Users/deity/2048/"
+#FilePath = "js/game_manager.js"
+
 class GitController < ApplicationController
   def raw_data
     repo = Gitlab::Git::Repository.new(FolderPath)
