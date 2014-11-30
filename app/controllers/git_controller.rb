@@ -18,20 +18,26 @@ class GitController < ApplicationController
       blob = Gitlab::Git::Blob.find(repo, c.id, FilePath) 
       blame = Rugged::Blame.new(repo.rugged, FilePath, { newest_commit: c.id })
 
-      blame.map do |b|
+      total_line_count = 0
+
+      blame_content_array = blame.map do |b|
         startLine = b[:final_start_line_number] - 1
         endLine  = startLine + b[:lines_in_hunk] - 1      
+        total_line_count += b[:lines_in_hunk]
 
         #b
-
         { 
           content: blob.data.lines[startLine..endLine].each { |l| l.delete!("\n") },
-          final_commit_id: b[:final_commit_id][0..7],
+          commit_id: b[:orig_commit_id][0..7],
           final_line: b[:final_start_line_number],
-          orig_commit_id: b[:orig_commit_id][0..7],
-          orig_line: b[:orig_start_line_number]
+          orig_line: b[:orig_start_line_number],
+          lines: b[:lines_in_hunk]
         }
       end
+
+      {commit_id: c.id[0..7], 
+       total_line_count: total_line_count,
+       blame_content_array: blame_content_array}
     end
 
     author_data = commits.group_by { |c| c.author_name } 

@@ -1,7 +1,3 @@
-class Util
-  @generateColor: (commit_id) ->
-    return "#{commit_id.substr(0, 6)}"
-
 class CommitBlock
   constructor: (@blame_data) ->
     #console.log @blame_data
@@ -23,7 +19,7 @@ class CommitBlock
       codes = commit.content.map (line) ->
         code_block(line)
 
-      blame_block(commit.final_commit_id, codes.join(""))
+      blame_block(commit.commit_id, codes.join(""))
 
     return commit_block(blames.join(""))
 

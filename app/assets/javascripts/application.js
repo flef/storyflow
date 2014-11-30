@@ -15,4 +15,5 @@
 //= require turbolinks
 //= require d3
 //= require d3.sankey.local
-//= require_tree .
+//= require util
+//= require flow2

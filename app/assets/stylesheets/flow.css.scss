@@ -1,6 +1,6 @@
 $sidebar_width: 200px;
 $commit_block_width: 300px;
-$history_flow_height: 120px;
+$history_flow_height: 150px;
 
 html, body {
   height: 100%;
@@ -17,13 +17,13 @@ html, body {
   box-sizing: border-box;
   #sidebar {
     height: 100%;
+    width: 200px;
     background-color: gray;
     width: $sidebar_width;
     overflow: auto;
 
     .author_block {
       border: 1px solid black;
-      box-sizing: border-box;
 
       .author_info {
         height: 70px;
@@ -50,14 +50,15 @@ html, body {
   #history_flow {
     height: $history_flow_height;
     width: 100%;
-    #chartContainer {
-      height: 100%;
-      white-space: nowrap;
 
-      #chart {
-        transform-origin: 0 0;
-      }
-    }
+    /*#chartContainer {*/
+      /*height: 100%;*/
+      /*white-space: nowrap;*/
+
+      /*#chart {*/
+        /*transform-origin: 0 0;*/
+      /*}*/
+    /*}*/
   }
 }
 
