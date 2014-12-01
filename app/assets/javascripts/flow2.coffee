@@ -20,6 +20,7 @@ class HistoryFlow
             obj.y0 = y0
             y0 += obj.lines
             return obj
+          d.total_line_count = y0
 
         return input_data
       
@@ -33,20 +34,25 @@ class HistoryFlow
         )
 
       updater = () ->
-        x.domain(filtered_data.map (d) -> d.commit_id)
-        y.domain([0, d3.max(filtered_data, (d) -> d.total_line_count)])
+        stacked_data = stacker(filtered_data)
+        x.domain(stacked_data.map (d) -> d.commit_id)
+        y.domain([0, d3.max(stacked_data, (d) -> d.total_line_count)])
 
         commit_block = svg.selectAll(".commit_blame")
-          .data(stacker(filtered_data), (d) -> d.commit_id)
+          .data(stacked_data, (d) -> d.commit_id)
 
         commit_block
           .enter().append("g")
           .attr("class", (d) -> "commit_blame commit_#{d.commit_id}")
           .attr("transform", (d) -> "translate(#{x(d.commit_id)}, 0)")
 
-        #commit_block
-          #.exit()
-          #.remove()
+        commit_block
+          .transition()
+          .attr("transform", (d) -> "translate(#{x(d.commit_id)}, 0)")
+
+        commit_block
+          .exit()
+          .remove()
 
         blame_block = commit_block.selectAll("rect")
           .data(((d) -> d.blame_content_array), (d) -> d.blame_id)
@@ -55,6 +61,7 @@ class HistoryFlow
           .transition()
           .attr("y", (d) -> y(d.y0))
           .attr("height", (d) -> y(d.y0 + d.lines) - y(d.y0))
+          .attr("width", x.rangeBand())
 
         blame_block
           .enter()
@@ -74,13 +81,10 @@ class HistoryFlow
           .on("mouseout", (d) ->
             blame_block.classed("faded_blame_block", false))
           .on("click", (d) ->
-            filtered_data = filtered_data.map((commit_block) ->
-              {
-                commit_id: commit_block.commit_id,
-                total_line_count: commit_block.total_line_count,
-                blame_content_array: commit_block.blame_content_array.filter (obj) -> obj.commit_id == d.commit_id
-              })
-            #filtered_data = filtered_data.filter (commit_block) -> commit_block.commit_id != d.commit_id
+            filtered_data = filtered_data.map((commit_block) -> {
+              commit_id: commit_block.commit_id,
+              blame_content_array: commit_block.blame_content_array.filter (obj) -> obj.commit_id == d.commit_id
+            }).filter (commit_block) -> commit_block.blame_content_array.length != 0
             updater()
           )
 

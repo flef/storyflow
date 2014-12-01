@@ -21,12 +21,9 @@ class GitController < ApplicationController
       blob = Gitlab::Git::Blob.find(repo, c.id, FilePath) 
       blame = Rugged::Blame.new(repo.rugged, FilePath, { newest_commit: c.id })
 
-      total_line_count = 0
-
       blame_content_array = blame.each_with_index.map do |b, blame_i|
         startLine = b[:final_start_line_number] - 1
         endLine  = startLine + b[:lines_in_hunk] - 1      
-        total_line_count += b[:lines_in_hunk]
 
         #b
         { 
@@ -40,7 +37,7 @@ class GitController < ApplicationController
       end
 
       {commit_id: c.id[0..7], 
-       total_line_count: total_line_count,
+       #total_line_count: total_line_count,
        blame_content_array: blame_content_array}
     end
 
