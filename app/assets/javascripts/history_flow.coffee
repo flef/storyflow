@@ -85,10 +85,11 @@ class window.HistoryFlow
           scroll_top = $("#code_blocks").scrollTop()
 
           middle_left = $("#code_blocks").width() / 2
-          middle_top = $("#code_blocks").height() / 2
+          middle_top = 0
 
-          $("#code_blocks").scrollLeft(blame_pos.left + scroll_left - middle_left)
-          $("#code_blocks").scrollTop(blame_pos.top + scroll_top - middle_top)
+          $("#code_blocks").clearQueue().animate
+            scrollLeft: blame_pos.left + scroll_left - middle_left
+            scrollTop: blame_pos.top + scroll_top - middle_top
 
           blame_div.addClass('highlight_blame')
         )

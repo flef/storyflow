@@ -2,7 +2,7 @@
 // cb_ prefix for code block related parts
 
 $sidebar_width: 200px;
-$commit_block_width: 300px;
+$commit_block_width: 500px;
 $history_flow_height: 150px;
 
 html, body {
@@ -18,11 +18,11 @@ html, body {
   height: 100%;
   float: left;
   box-sizing: border-box;
+
   #sidebar {
     height: 100%;
-    width: 200px;
-    background-color: gray;
     width: $sidebar_width;
+    background-color: gray;
     overflow: auto;
 
     .author_block {
