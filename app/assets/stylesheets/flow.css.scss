@@ -74,7 +74,11 @@ html, body {
     width: 100%;
 
     .hover_blame_block {
-      fill: black !important;
+      stroke-width: 10;
+      stroke: black;
+      stroke-position: inside;
+
+      /*fill: black !important;*/
       opacity: 0.7;
     }
 

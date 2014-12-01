@@ -76,7 +76,12 @@ class window.HistoryFlow
 
       blame_block
         .on("mouseover", (d, i) ->
+          #svg.selectAll("rect").sort (a, b) -> if a.blame_id != d.blame_id then -1 else 1
+            #console.log a.hh
+          #if (a.id != d.id) then -1 else 1
+
           d3.select(this).classed("hover_blame_block", true)
+
           blame_block.classed("faded_blame_block", (blame) -> blame.commit_id != d.commit_id)
           blame_div = $(".blame_#{d.blame_id}")
           blame_pos = blame_div.position()
@@ -84,8 +89,13 @@ class window.HistoryFlow
           scroll_left = $("#code_blocks").scrollLeft()
           scroll_top = $("#code_blocks").scrollTop()
 
-          middle_left = $("#code_blocks").width() / 2
+          MARGIN = 50
+
+          middle_left = $("#code_blocks").width() / 2 - MARGIN
           middle_top = 0
+
+          console.log blame_div.width()
+          console.log $("#code_blocks").width()
 
           $("#code_blocks").clearQueue().animate
             scrollLeft: blame_pos.left + scroll_left - middle_left
