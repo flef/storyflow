@@ -1,3 +1,6 @@
+// hf_ prefix for historyflow related parts
+// cb_ prefix for code block related parts
+
 $sidebar_width: 200px;
 $commit_block_width: 300px;
 $history_flow_height: 150px;
@@ -43,22 +46,37 @@ html, body {
   box-sizing: border-box;
   float: left;
 
-  /*#chartContainer {*/
-    /*height: 100%;*/
-    /*white-space: nowrap;*/
-
-    /*#chart {*/
-      /*transform-origin: 0 0;*/
-    /*}*/
-  /*}*/
-
   #top_part {
     height: calc(100% - #{$history_flow_height});
+
+    #code_blocks {
+      height: 100%;
+      overflow: auto;
+      white-space: nowrap;
+
+      .cb_commit {
+        vertical-align: top;
+        display: inline-block;
+        width: $commit_block_width;
+        margin-right: 50px;
+
+        .highlight_blame {
+          border: 1px solid black;
+          /*background: black;*/
+
+        }
+      }
+    }
   }
 
   #history_flow {
     height: $history_flow_height;
     width: 100%;
+
+    .hover_blame_block {
+      fill: black !important;
+      opacity: 0.7;
+    }
 
     .faded_blame_block {
       opacity: 0.3;
@@ -68,13 +86,6 @@ html, body {
       display: none;
     }
   }
-}
-
-.blame_commit_block {
-  vertical-align: top;
-  display: inline-block;
-  width: $commit_block_width;
-  /*margin-right: 50px;*/
 }
 
 .hidden {

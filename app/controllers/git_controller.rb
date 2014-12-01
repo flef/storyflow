@@ -1,5 +1,6 @@
 FolderPath = "."
 FilePath = 'app/controllers/git_controller.rb'
+#FilePath = 'app/assets/stylesheets/flow.css.scss'
 
 #FolderPath = "/Users/deity/jquery.transit"
 #FilePath = 'jquery.transit.js'
@@ -27,7 +28,7 @@ class GitController < ApplicationController
 
         #b
         { 
-          #content: blob.data.lines[startLine..endLine].each { |l| l.delete!("\n") },
+          content: blob.data.lines[startLine..endLine].each { |l| l.delete!("\n") },
           blame_id: "#{commit_i}_#{blame_i}",
           commit_id: b[:orig_commit_id][0..7],
           final_line: b[:final_start_line_number],
@@ -37,7 +38,6 @@ class GitController < ApplicationController
       end
 
       {commit_id: c.id[0..7], 
-       #total_line_count: total_line_count,
        blame_content_array: blame_content_array}
     end
 

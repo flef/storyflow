@@ -16,4 +16,6 @@
 //= require d3
 //= require d3.sankey.local
 //= require util
-//= require flow2
+//= require controller
+//= require history_flow
+//= require commit_block
