@@ -12,6 +12,7 @@ class window.HistoryFlow
 
     x = d3.scale.ordinal().rangeBands([0, WIDTH])
     y = d3.scale.linear().range([0, HEIGHT - SCALE_HANDLE_MARGIN])
+    selected_index = null
 
     color = d3.scale.linear()
              .range([LEFT_COLOR_SCALE, RIGHT_COLOR_SCALE])
@@ -37,6 +38,11 @@ class window.HistoryFlow
         d.total_line_count = y0
 
       return input_data
+
+    reset = ->
+      d3.selectAll(".hf_scale_handle").classed("selected_block", false)
+      selected_index = null
+      filtered_data = data
     
     svg_bottom_handler = svg.append("rect")
       .attr("fill", "white")
@@ -45,7 +51,7 @@ class window.HistoryFlow
       .on("click", =>
         @state = "NORMAL"
         $(".cb_blame").show()
-        filtered_data = data
+        reset()
         updater()
       )
 
@@ -54,10 +60,17 @@ class window.HistoryFlow
       x.domain(stacked_data.map (d) -> d.commit_id)
       y.domain([0, d3.max(stacked_data, (d) -> d.total_line_count)])
 
-
-
       hf_scale_handle = svg.selectAll(".hf_scale_handle")
         .data(stacked_data, (d) -> d.commit_id)
+
+      hf_scale_handle
+        .exit()
+        .remove()
+
+      hf_scale_handle
+        .transition()
+        .attr("transform", (d) -> "translate(#{x(d.commit_id)}, 0)")
+        .attr("width", x.rangeBand())
 
       hf_scale_handle
         .enter()
@@ -74,6 +87,26 @@ class window.HistoryFlow
         .on("mouseout", (d) ->
           d3.select(this).classed("hover_block", false)
           d3.select(".hf_commit.commit_#{d.commit_id}").classed("hover_block", false))
+        .on("click", (d, i) ->
+          if d3.select(this).classed("selected_block")
+            d3.select(this).classed("selected_block", false)
+          else
+            d3.select(this).classed("selected_block", true)
+            
+            if selected_index != null
+              range = [selected_index, i].sort (a, b) -> a > b
+              filtered_data = filtered_data.slice(range[0], range[1] + 1)
+
+
+              d3.selectAll(".hf_scale_handle").classed("selected_block", false)
+              selected_index = null
+
+              updater()
+            else
+              selected_index = i
+
+          console.log d, i
+        )
 
 
       hf_commit = svg.selectAll(".hf_commit")
@@ -91,7 +124,6 @@ class window.HistoryFlow
       hf_commit
         .exit()
         .remove()
-
 
 
       hf_blame = hf_commit.selectAll(".hf_blame")

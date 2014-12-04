@@ -83,11 +83,12 @@ html, body {
     width: 100%;
 
     .hover_block {
-      /*stroke-width: 10;*/
-      /*stroke: black;*/
-      /*stroke-position: inside;*/
-
       fill: black !important;
+      opacity: 0.7;
+    }
+
+    .selected_block {
+      fill: red !important;
       opacity: 0.7;
     }
 
