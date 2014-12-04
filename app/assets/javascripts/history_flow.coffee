@@ -12,7 +12,7 @@ class window.HistoryFlow
       .attr("width", WIDTH)
       .attr("height", HEIGHT)
 
-    filtered_data = data.blame_data
+    filtered_data = data
     stacker = (input_data) ->
       for d in input_data
         y0 = 0
@@ -84,20 +84,19 @@ class window.HistoryFlow
           d3.select(this).classed("hover_blame_block", true)
 
           blame_block.classed("faded_blame_block", (blame) -> blame.commit_id != d.commit_id)
-          blame_div = $(".blame_#{d.blame_id}")
-          blame_pos = blame_div.position()
+          blame_div = $("#blame_#{d.blame_id}")
+          commit_div = blame_div.parent()
 
-          scroll_left = $("#code_blocks").scrollLeft()
-          scroll_top = $("#code_blocks").scrollTop()
-
+          blame_x = parseInt(commit_div.css("transform").split(",")[4])
+          blame_y = parseInt(blame_div.css("transform").split(",")[5])
+          
           MARGIN_LEFT = 50
           MARGIN_TOP = 20
 
-          middle_left = $("#code_blocks").width() / 2 - MARGIN_LEFT
-
+          middle_left = $("#code_blocks").width() / 2 - blame_div.width() / 2
           $("#code_blocks").clearQueue().animate
-            scrollLeft: blame_pos.left + scroll_left - middle_left
-            scrollTop: blame_pos.top + scroll_top - MARGIN_TOP
+            scrollLeft: blame_x - middle_left
+            scrollTop: blame_y - MARGIN_TOP
 
           $(".cb_commit .commit_#{d.commit_id}").not(blame_div)
             .css("background-color", Util.generateRGBA(d.commit_id, 0.3))

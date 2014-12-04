@@ -2,6 +2,10 @@ class window.CommitBlock
   constructor: (@blame_data) ->
     #console.log @blame_data
   
+
+
+
+  
   getHTML: =>
     commit_block = (html) ->
       "<div class='cb_commit'>#{html}</div>"

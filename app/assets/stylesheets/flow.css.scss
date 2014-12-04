@@ -53,14 +53,30 @@ html, body {
     #code_blocks {
       height: 100%;
       overflow: auto;
+      position: relative;
       white-space: nowrap;
 
       .cb_commit {
-        vertical-align: top;
-        display: inline-block;
+        position: absolute;
+        top: 0;
+        left: 0;
+        /*border: 1px solid black;*/
+        /*vertical-align: top;*/
+        /*display: inline-block;*/
+
         width: $commit_block_width;
         margin-right: 50px;
+      }
 
+      .cb_code_block {
+        overflow: hidden;
+        margin: 0;
+        font-size: 12px;
+      }
+
+      .cb_blame {
+        position: absolute;
+        width: 100%;
       }
     }
   }
@@ -90,14 +106,6 @@ html, body {
 
 .hidden {
   display: none;
-}
-
-.code_block {
-  overflow: hidden;
-  pre {
-    margin: 0;
-    font-size: 12px;
-  }
 }
 
 .larger_view {

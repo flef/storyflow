@@ -5,12 +5,14 @@ class Controller
 
   constructor: ->
     d3.json 'data.json', (data) =>
-      console.log data
+      #console.log data
+      blame_data = data.blame_data
 
-      for blame in data.blame_data
-        @commit_blocks.push(new CommitBlock(blame))
+      #for blame in data.blame_data
+        #@commit_blocks.push(new CommitBlock(blame))
 
-      @flow = new HistoryFlow(data)
+      @flow = new HistoryFlow(blame_data)
+      @commit_blocks = new CommitBlocks(blame_data)
       
       #for author, commits of data.author_data
         #@author_blocks.push(new AuthorBlock(author, commits))
