@@ -73,6 +73,8 @@ class window.HistoryFlow
         .transition()
         .attr("y", (d) -> y(d.y0))
         .attr("height", (d) -> y(d.y0 + d.lines) - y(d.y0))
+        .style("stroke-width", 0.3)
+        .style("stroke", "white")
 
       blame_block
         .on("mouseover", (d, i) ->

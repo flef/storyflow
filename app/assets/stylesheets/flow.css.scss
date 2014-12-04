@@ -74,16 +74,16 @@ html, body {
     width: 100%;
 
     .hover_blame_block {
-      stroke-width: 10;
-      stroke: black;
-      stroke-position: inside;
+      /*stroke-width: 10;*/
+      /*stroke: black;*/
+      /*stroke-position: inside;*/
 
-      /*fill: black !important;*/
+      fill: black !important;
       opacity: 0.7;
     }
 
     .faded_blame_block {
-      opacity: 0.3;
+      opacity: 0.2;
     }
 
     .hidden_blame_block {
