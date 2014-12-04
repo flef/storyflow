@@ -1,5 +1,6 @@
 // hf_ prefix for historyflow related parts
 // cb_ prefix for code block related parts
+// Thanks to Bok
 
 $sidebar_width: 200px;
 $commit_block_width: 500px;
@@ -60,11 +61,6 @@ html, body {
         width: $commit_block_width;
         margin-right: 50px;
 
-        .highlight_blame {
-          border: 1px solid black;
-          /*background: black;*/
-
-        }
       }
     }
   }

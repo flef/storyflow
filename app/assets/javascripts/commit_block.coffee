@@ -7,8 +7,7 @@ class window.CommitBlock
       "<div class='cb_commit'>#{html}</div>"
 
     blame_block = (commit_id, blame_id, html) ->
-      "<div class='cb_blame commit_#{commit_id} blame_#{blame_id}' 
-        style='background-color: ##{Util.generateColor(commit_id)}'>
+      "<div class='cb_blame commit_#{commit_id} blame_#{blame_id}'>
         #{html}
       </div>"
 

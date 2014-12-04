@@ -1,4 +1,5 @@
 class window.HistoryFlow
+  state: "NORMAL"
   constructor: (data) ->
     WIDTH = $("#history_flow").width()
     HEIGHT = $("#history_flow").height()
@@ -27,12 +28,14 @@ class window.HistoryFlow
       .attr("fill", "white")
       .attr("width", WIDTH)
       .attr("height", HEIGHT)
-      .on("click", ->
+      .on("click", =>
+        @state = "NORMAL"
+        $(".cb_blame").show()
         filtered_data = data.blame_data
         updater()
       )
 
-    updater = () ->
+    updater = =>
       stacked_data = stacker(filtered_data)
       x.domain(stacked_data.map (d) -> d.commit_id)
       y.domain([0, d3.max(stacked_data, (d) -> d.total_line_count)])
@@ -73,15 +76,11 @@ class window.HistoryFlow
         .transition()
         .attr("y", (d) -> y(d.y0))
         .attr("height", (d) -> y(d.y0 + d.lines) - y(d.y0))
-        .style("stroke-width", 0.3)
+        .style("stroke-width", (d) -> if y(d.y0 + d.lines) - y(d.y0) < 2 then 0 else 0.3)
         .style("stroke", "white")
 
       blame_block
         .on("mouseover", (d, i) ->
-          #svg.selectAll("rect").sort (a, b) -> if a.blame_id != d.blame_id then -1 else 1
-            #console.log a.hh
-          #if (a.id != d.id) then -1 else 1
-
           d3.select(this).classed("hover_blame_block", true)
 
           blame_block.classed("faded_blame_block", (blame) -> blame.commit_id != d.commit_id)
@@ -91,32 +90,42 @@ class window.HistoryFlow
           scroll_left = $("#code_blocks").scrollLeft()
           scroll_top = $("#code_blocks").scrollTop()
 
-          MARGIN = 50
+          MARGIN_LEFT = 50
+          MARGIN_TOP = 20
 
-          middle_left = $("#code_blocks").width() / 2 - MARGIN
-          middle_top = 0
-
-          console.log blame_div.width()
-          console.log $("#code_blocks").width()
+          middle_left = $("#code_blocks").width() / 2 - MARGIN_LEFT
 
           $("#code_blocks").clearQueue().animate
             scrollLeft: blame_pos.left + scroll_left - middle_left
-            scrollTop: blame_pos.top + scroll_top - middle_top
+            scrollTop: blame_pos.top + scroll_top - MARGIN_TOP
 
-          blame_div.addClass('highlight_blame')
+          $(".cb_commit .commit_#{d.commit_id}").not(blame_div)
+            .css("background-color", Util.generateRGBA(d.commit_id, 0.3))
+
+          blame_div
+            .css("background-color", Util.generateRGBA(d.commit_id, 1))
+            .addClass('highlight_blame')
         )
 
         .on("mouseout", (d) ->
           d3.select(this).classed("hover_blame_block", false)
           blame_block.classed("faded_blame_block", false)
+          $(".cb_commit .commit_#{d.commit_id}").css("background-color", "")
           $(".blame_#{d.blame_id}").removeClass('highlight_blame')
         )
-        .on("click", (d) ->
-          filtered_data = filtered_data.map((commit_block) -> {
-            commit_id: commit_block.commit_id,
-            blame_content_array: commit_block.blame_content_array.filter (obj) -> obj.commit_id == d.commit_id
-          }).filter (commit_block) -> commit_block.blame_content_array.length != 0
-          updater()
+        .on("click", (d) =>
+          console.log d
+          console.log @state
+          if @state is "NORMAL"
+            filtered_data = filtered_data.map((commit_block) -> {
+              commit_id: commit_block.commit_id,
+              blame_content_array: commit_block.blame_content_array.filter (obj) -> obj.commit_id == d.commit_id
+            }).filter (commit_block) -> commit_block.blame_content_array.length != 0
+            updater()
+            @state = "ENLARGED"
+
+          else if @state is "ENLARGED"
+            $(".cb_blame").not(".commit_#{d.commit_id}").slideUp()
         )
 
       blame_block

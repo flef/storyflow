@@ -15,7 +15,7 @@ class Controller
       #for author, commits of data.author_data
         #@author_blocks.push(new AuthorBlock(author, commits))
 
-      @putHTML()
+      #@putHTML()
 
   putHTML: ->
     @commit_blocks.forEach (c) ->
