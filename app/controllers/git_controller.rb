@@ -18,9 +18,13 @@ class GitController < ApplicationController
       path: FilePath
     })
 
+    commitHashTable = {}
+
     blame_data = commits.reverse.each_with_index.map do |c, commit_i|
       blob = Gitlab::Git::Blob.find(repo, c.id, FilePath) 
       blame = Rugged::Blame.new(repo.rugged, FilePath, { newest_commit: c.id })
+      
+      commitHashTable[c.id] = commit_i
 
       blame_content_array = blame.each_with_index.map do |b, blame_i|
         startLine = b[:final_start_line_number] - 1
@@ -29,6 +33,7 @@ class GitController < ApplicationController
         #b
         { 
           content: blob.data.lines[startLine..endLine].each { |l| l.delete!("\n") },
+          commit_number: commitHashTable[b[:orig_commit_id]],
           blame_id: "#{commit_i}_#{blame_i}",
           commit_id: b[:orig_commit_id][0..7],
           final_line: b[:final_start_line_number],
@@ -41,8 +46,9 @@ class GitController < ApplicationController
        blame_content_array: blame_content_array}
     end
 
-    author_data = commits.group_by { |c| c.author_name } 
-    {blame_data: blame_data, author_data: author_data}
+    author_data = commits.group_by { |c| c.author_name }
+    history_data = { numberOfCommit: commits.length }
+    {blame_data: blame_data, author_data: author_data, history_data: history_data}
   
     #commits.reverse.each_with_index do |c, cIndex|
       #blob = Gitlab::Git::Blob.find(repo, c.id, FilePath) 

@@ -3,9 +3,17 @@ class window.HistoryFlow
   constructor: (data) ->
     WIDTH = $("#history_flow").width()
     HEIGHT = $("#history_flow").height()
+    SATURATION = 0.8
+    LUMINANCE = 0.4
 
     x = d3.scale.ordinal().rangeBands([0, WIDTH])
     y = d3.scale.linear().range([0, HEIGHT])
+
+    nbCommit = data.history_data.numberOfCommit
+
+    colorScale = d3.scale.linear().domain([1,22]).range([0, 359])   
+    color = (x) -> d3.hsl(colorScale(x), SATURATION, LUMINANCE)
+
 
     svg = d3.select("#history_flow")
       .append("svg")
@@ -65,11 +73,13 @@ class window.HistoryFlow
         .attr("height", (d) -> y(d.y0 + d.lines) - y(d.y0))
         .attr("width", x.rangeBand())
 
+
+
       blame_block
         .enter()
         .append("rect")
         .attr("class", (d) -> "hf_blame_block_#{d.commit_id}")
-        .style("fill", (d) -> Util.generateColor(d.commit_id))
+        .style("fill", (d) -> color(d.commit_number))
         .attr("width", x.rangeBand())
         .attr("y", 0)
         .attr("height", 0)
@@ -100,10 +110,10 @@ class window.HistoryFlow
             scrollTop: blame_pos.top + scroll_top - MARGIN_TOP
 
           $(".cb_commit .commit_#{d.commit_id}").not(blame_div)
-            .css("background-color", Util.generateRGBA(d.commit_id, 0.3))
+            .css("background-color", color(d.commit_number))
 
           blame_div
-            .css("background-color", Util.generateRGBA(d.commit_id, 1))
+            .css("background-color", color(d.commit_number))
             .addClass('highlight_blame')
         )
 
