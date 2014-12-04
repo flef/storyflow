@@ -4,7 +4,7 @@
 
 $sidebar_width: 200px;
 $commit_block_width: 500px;
-$history_flow_height: 150px;
+$history_flow_height: 180px;
 
 html, body {
   height: 100%;
@@ -82,7 +82,7 @@ html, body {
     height: $history_flow_height;
     width: 100%;
 
-    .hover_blame_block {
+    .hover_block {
       /*stroke-width: 10;*/
       /*stroke: black;*/
       /*stroke-position: inside;*/
