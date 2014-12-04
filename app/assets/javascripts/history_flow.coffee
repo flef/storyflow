@@ -3,14 +3,16 @@ class window.HistoryFlow
   constructor: (data, numberOfCommit) ->
     WIDTH = $("#history_flow").width()
     HEIGHT = $("#history_flow").height()
-    SATURATION = 0.8
-    LUMINANCE = 0.4
+    RIGHT_COLOR_SCALE = "#FDFFCB"
+    LEFT_COLOR_SCALE = "#232942"
 
     x = d3.scale.ordinal().rangeBands([0, WIDTH])
     y = d3.scale.linear().range([0, HEIGHT])
 
-    colorScale = d3.scale.linear().domain([1,numberOfCommit]).range([0, 359])   
-    color = (x) -> d3.hsl(colorScale(x), SATURATION, LUMINANCE)
+    color = d3.scale.linear()
+             .domain([0,22])  
+             .range([LEFT_COLOR_SCALE, RIGHT_COLOR_SCALE])
+             .interpolate(d3.interpolateHsl)
 
 
     svg = d3.select("#history_flow")
