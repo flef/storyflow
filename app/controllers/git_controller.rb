@@ -1,6 +1,6 @@
 FolderPath = "."
 FilePath = 'app/controllers/git_controller.rb'
-#FilePath = 'app/assets/stylesheets/flow.css.scss'
+#FilePath = 'app/assets/javascripts/history_flow.coffee'
 
 #FolderPath = "/Users/deity/jquery.transit"
 #FilePath = 'jquery.transit.js'

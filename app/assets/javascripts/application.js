@@ -18,4 +18,3 @@
 //= require util
 //= require controller
 //= require history_flow
-//= require commit_blocks
