@@ -8,9 +8,8 @@ SCALE_HANDLE_HEIGHT = 25
 CURRENT_COMMITS_HEIGHT = 2
 SCALE_HANDLE_MARGIN = SCALE_HANDLE_HEIGHT + CURRENT_COMMITS_HEIGHT
 
-#RIGHT_COLOR_SCALE = "#FDFFCB"
-LEFT_COLOR_SCALE = "#FDFFCB"
-RIGHT_COLOR_SCALE = "#232942"
+RIGHT_COLOR_SCALE = "#FDFFCB"
+LEFT_COLOR_SCALE = "#232942"
 
 class window.HistoryFlow
   state: "NORMAL"
@@ -33,13 +32,8 @@ class window.HistoryFlow
     WIDTH = $("#history_flow").width()
     HEIGHT = $("#history_flow").height()
 
-    console.log @data
-
     selected_index = null
     filtered_data = @data
-
-    #isOnScreen = (elem) ->
-      #console.log $("#code_blocks").scrollLeft(), $(elem).left()
 
     x = d3.scale.ordinal().rangeBands([0, WIDTH])
     y = d3.scale.linear().range([0, HEIGHT - SCALE_HANDLE_MARGIN])
@@ -312,3 +306,4 @@ class window.HistoryFlow
         .remove()
 
     updater()
+    getCommitsOnScreen()
