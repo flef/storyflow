@@ -49,6 +49,8 @@ class GitController < ApplicationController
        blame_content_array: blame_content_array}
     end
 
+    blame_data = blame_data.reverse
+
     # compute md5 of mail for gravatar
     history_commits = commits.map do |c|
       md5 << c.author_email

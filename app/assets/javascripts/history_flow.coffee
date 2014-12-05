@@ -171,7 +171,7 @@ class window.HistoryFlow
         .enter()
         .append("rect")
         .attr("class", (d) -> "hf_scale_handle")
-        .style("fill", (d, i) -> color(i))
+        .style("fill", (d, i) -> color(data.length-i))
         .attr("width", x.rangeBand())
         .attr("height", SCALE_HANDLE_HEIGHT)
         .attr("y", 0)
