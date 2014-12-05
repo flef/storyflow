@@ -1,6 +1,5 @@
 // hf_ prefix for historyflow related parts
 // cb_ prefix for code block related parts
-// Thanks to Bok
 
 $sidebar_width: 300px;
 $commit_block_width: 500px;
@@ -15,8 +14,6 @@ html, body {
 #container {
   height: 100%;
 }
-
-
 
 #container {
   height: 100%;
@@ -82,27 +79,33 @@ html, body {
         }
       }
     }
-    #history_flow {
-      height: $history_flow_height;
+
+    #right_container {
+      float: left;
       width: calc(100% - #{$sidebar_width});
-      float: right;
+      overflow: hidden;
 
-      .hover_block {
-        fill: black !important;
-        opacity: 0.7;
-      }
+      #history_flow {
+        height: $history_flow_height;
+        width: 100%;
 
-      .selected_block {
-        fill: red !important;
-        opacity: 0.7;
-      }
+        .hover_block {
+          fill: black !important;
+          opacity: 0.7;
+        }
 
-      .faded_blame_block {
-        opacity: 0.2;
-      }
+        .selected_block {
+          fill: red !important;
+          opacity: 0.7;
+        }
 
-      .hidden_blame_block {
-        display: none;
+        .faded_blame_block {
+          opacity: 0.2;
+        }
+
+        .hidden_blame_block {
+          display: none;
+        }
       }
     }
   }
