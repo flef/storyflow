@@ -47,7 +47,7 @@ class GitController < ApplicationController
     end
 
     author_data = commits.group_by { |c| c.author_name }
-    history_data = { numberOfCommit: commits.length }
+    history_data = { numberOfCommit: commits.length, commits: commits }
     {blame_data: blame_data, author_data: author_data, history_data: history_data}
   
     #commits.reverse.each_with_index do |c, cIndex|

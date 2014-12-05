@@ -24,3 +24,4 @@ class AuthorBlock
 
 $ ->
   window.controller = new Controller
+

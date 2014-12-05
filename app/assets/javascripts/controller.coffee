@@ -7,6 +7,7 @@ class Controller
       history_data = data.history_data
 
       @flow = new HistoryFlow(blame_data, history_data.numberOfCommit)
-
+      @sidebar = new Sidebar(history_data)
+      
 $ ->
   window.controller = new Controller
