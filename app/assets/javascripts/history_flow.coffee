@@ -31,6 +31,8 @@ class window.HistoryFlow
     WIDTH = $("#history_flow").width()
     HEIGHT = $("#history_flow").height()
 
+    console.log @data
+
     selected_index = null
     filtered_data = @data
 
@@ -47,9 +49,7 @@ class window.HistoryFlow
       .attr("width", WIDTH)
       .attr("height", HEIGHT)
 
-    div = d3.select("#code_blocks")
-
-    svg_bottom_handler = svg.append("rect")
+    svg.append("rect")
       .attr("fill", "white")
       .attr("width", WIDTH)
       .attr("height", HEIGHT)
@@ -59,6 +59,36 @@ class window.HistoryFlow
         selected_index = null
         reset()
         updater()
+
+    svg.append("g")
+      .attr("id", "hf_current_commits_container")
+
+    svg.append("g")
+      .attr("id", "hf_scale_handle_container")
+
+    div = d3.select("#code_blocks")
+
+    getCommitsOnScreen = ->
+      code_blocks = $("#code_blocks")
+      scroll_left = code_blocks.scrollLeft()
+      screen_width = code_blocks.width()
+
+      start = Math.floor(scroll_left / (BLOCK_WIDTH + MARGIN))
+      end = Math.floor((scroll_left + screen_width) / (BLOCK_WIDTH + MARGIN))
+
+      console.log $(".hf_current_commits:nth-child(n+4):nth-child(-n+8)")
+
+      hf_current_commits = svg.selectAll(".hf_current_commits")
+        #.selectAll("nth-child(n+4):nth-child(-n+8)")
+
+
+      console.log hf_current_commits
+
+      console.log start, end
+      console.log scroll_left, screen_width
+
+    $("#code_blocks").scroll (e) ->
+      getCommitsOnScreen()
 
     reset = =>
       d3.selectAll(".hf_scale_handle").classed("selected_block", false)
@@ -120,7 +150,8 @@ class window.HistoryFlow
         .attr("class", "cb_code_block")
         .text((d) -> if d == "" then " " else d)
 
-      hf_scale_handle = svg.selectAll(".hf_scale_handle")
+      hf_scale_handle = svg.select("#hf_scale_handle_container")
+        .selectAll(".hf_scale_handle")
         .data(stacked_data, (d) -> d.commit_id)
 
       hf_scale_handle
@@ -193,7 +224,9 @@ class window.HistoryFlow
         .enter()
         .append("rect")
         .attr("class", (d) -> "hf_blame hf_blame_block_#{d.commit_id}")
-        .style("fill", (d) -> color(d.commit_number))
+        .style("fill", (d) ->
+          console.log d.commit_number, color(d.commit_number)
+          color(d.commit_number))
         .attr("width", x.rangeBand())
         .attr("y", 0)
         .attr("height", 0)
