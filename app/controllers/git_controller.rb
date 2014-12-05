@@ -46,8 +46,14 @@ class GitController < ApplicationController
        blame_content_array: blame_content_array}
     end
 
+    history_commits = commits.map do |c|
+      commit_hash = c.to_hash
+      commit_hash[:test_field] = "Hello World!"
+      commit_hash
+    end
+
     author_data = commits.group_by { |c| c.author_name }
-    history_data = { numberOfCommit: commits.length, commits: commits }
+    history_data = { numberOfCommit: commits.length, commits: history_commits }
     {blame_data: blame_data, author_data: author_data, history_data: history_data}
   
     #commits.reverse.each_with_index do |c, cIndex|
