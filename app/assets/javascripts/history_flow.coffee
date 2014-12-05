@@ -1,22 +1,42 @@
-BLOCK_WIDTH = 500
 MARGIN = 50
+SCROLL_MARGIN_LEFT = 50
+SCROLL_MARGIN_TOP = 20
+
+BLOCK_WIDTH = 500
 PRE_HEIGHT = 14
+SCALE_HANDLE_HEIGHT = 25
+SCALE_HANDLE_MARGIN = SCALE_HANDLE_HEIGHT + 2
+
+RIGHT_COLOR_SCALE = "#FDFFCB"
+LEFT_COLOR_SCALE = "#232942"
 
 class window.HistoryFlow
   state: "NORMAL"
-  constructor: (data, numberOfCommit) ->
+  width: 0
+  height: 0
+  data: null
+
+  stacker: (input_data) ->
+    for d in input_data
+      y0 = 0
+      d.blame_content_array = d.blame_content_array.map (obj) ->
+        obj.y0 = y0
+        y0 += obj.lines
+        return obj
+      d.total_line_count = y0
+
+    return input_data
+
+  constructor: (@data, numberOfCommit) ->
     WIDTH = $("#history_flow").width()
     HEIGHT = $("#history_flow").height()
 
-    SCALE_HANDLE_HEIGHT = 25
-    SCALE_HANDLE_MARGIN = SCALE_HANDLE_HEIGHT + 2
 
-    RIGHT_COLOR_SCALE = "#FDFFCB"
-    LEFT_COLOR_SCALE = "#232942"
+    selected_index = null
+    filtered_data = @data
 
     x = d3.scale.ordinal().rangeBands([0, WIDTH])
     y = d3.scale.linear().range([0, HEIGHT - SCALE_HANDLE_MARGIN])
-    selected_index = null
 
     color = d3.scale.linear()
              .range([LEFT_COLOR_SCALE, RIGHT_COLOR_SCALE])
@@ -30,24 +50,6 @@ class window.HistoryFlow
 
     div = d3.select("#code_blocks")
 
-    filtered_data = data
-
-    stacker = (input_data) ->
-      for d in input_data
-        y0 = 0
-        d.blame_content_array = d.blame_content_array.map (obj) ->
-          obj.y0 = y0
-          y0 += obj.lines
-          return obj
-        d.total_line_count = y0
-
-      return input_data
-
-    reset = ->
-      d3.selectAll(".hf_scale_handle").classed("selected_block", false)
-      selected_index = null
-      filtered_data = data
-    
     svg_bottom_handler = svg.append("rect")
       .attr("fill", "white")
       .attr("width", WIDTH)
@@ -55,27 +57,27 @@ class window.HistoryFlow
       .on("click", =>
         @state = "NORMAL"
         $(".cb_blame").show()
+        selected_index = null
         reset()
         updater()
       )
 
+    reset = =>
+      d3.selectAll(".hf_scale_handle").classed("selected_block", false)
+      filtered_data = @data
+      selected_index = null
+
     updater = =>
-      stacked_data = stacker(filtered_data)
+      stacked_data = @stacker(filtered_data)
       x.domain(stacked_data.map (d) -> d.commit_id)
       y.domain([0, d3.max(stacked_data, (d) -> d.total_line_count)])
-
-      for d in stacked_data
-        console.log d.commit_id
 
       cb_div = div.selectAll(".cb_commit")
         .data(stacked_data, (d) -> d.commit_id)
 
-      console.log cb_div
-
       cb_div
         .transition()
         .style("left", (d, i) -> "#{i * (BLOCK_WIDTH + MARGIN)}px")
-        #.style("transform", (d, i) -> "translate(#{i * (BLOCK_WIDTH + MARGIN)}px, 0)")
 
       cb_div
         .enter()
@@ -83,8 +85,6 @@ class window.HistoryFlow
         .attr("id", (d) -> "commit_#{d.commit_id}")
         .attr("class", (d) -> "cb_commit")
         .style("left", (d, i) -> "#{i * (BLOCK_WIDTH + MARGIN)}px")
-        #.style("transform", (d, i) -> "translate(#{i * (BLOCK_WIDTH + MARGIN)}px, 0)")
-
 
       cb_div
         .exit()
@@ -93,13 +93,16 @@ class window.HistoryFlow
       cb_blame = cb_div.selectAll(".cb_blame")
         .data(((d) -> d.blame_content_array), (d) -> d.blame_id)
 
-
       cb_blame
         .enter()
         .append("div")
         .attr("id", (d) -> "blame_#{d.blame_id}")
         .attr("class", (d) -> "cb_blame commit_#{d.commit_id}")
         .style("transform", (d, i) -> "translate(0, #{d.y0 * PRE_HEIGHT}px)")
+        .on("mouseover", ->
+
+          console.log "over"
+        )
 
       cb_code = cb_blame.selectAll(".cb_code_block")
         .data((d) -> d.content)
@@ -150,19 +153,12 @@ class window.HistoryFlow
               range = [selected_index, i].sort (a, b) -> a > b
               filtered_data = filtered_data.slice(range[0], range[1] + 1)
 
-
               d3.selectAll(".hf_scale_handle").classed("selected_block", false)
               selected_index = null
 
               updater()
             else
-              selected_index = i
-
-          #console.log d, i
-        )
-
-
-
+              selected_index = i)
 
       hf_commit = svg.selectAll(".hf_commit")
         .data(stacked_data, (d) -> d.commit_id)
@@ -206,21 +202,10 @@ class window.HistoryFlow
       hf_blame
         .on("mouseover", (d, i) ->
           d3.select(this).classed("hover_block", true)
-
           hf_blame.classed("faded_blame_block", (blame) -> blame.commit_id != d.commit_id)
+
           blame_div = $("#blame_#{d.blame_id}")
           commit_div = blame_div.parent()
-
-          blame_x = parseInt(commit_div.css("transform").split(",")[4])
-          blame_y = parseInt(blame_div.css("transform").split(",")[5])
-          
-          MARGIN_LEFT = 50
-          MARGIN_TOP = 20
-
-          middle_left = $("#code_blocks").width() / 2 - blame_div.width() / 2
-          $("#code_blocks").clearQueue().animate
-            scrollLeft: blame_x - middle_left
-            scrollTop: blame_y - MARGIN_TOP
 
           $(".cb_commit .commit_#{d.commit_id}").not(blame_div)
             .css("background-color", color(d.commit_number))
@@ -235,7 +220,21 @@ class window.HistoryFlow
           $(".cb_commit .commit_#{d.commit_id}").css("background-color", "")
           $("#blame_#{d.blame_id}").removeClass('highlight_blame'))
 
-        .on("click", (d) =>
+        .on("click", (d) ->
+          blame_div = $("#blame_#{d.blame_id}")
+          commit_div = blame_div.parent()
+
+          blame_x = parseInt(commit_div.css("left"))
+          blame_y = parseInt(blame_div.css("transform").split(",")[5])
+          
+          middle_left = $("#code_blocks").width() / 2 - blame_div.width() / 2
+
+          $("#code_blocks").clearQueue().animate
+            scrollLeft: blame_x - middle_left
+            scrollTop: blame_y - SCROLL_MARGIN_TOP
+        )
+
+        .on("dblclick", (d) =>
           if @state is "NORMAL"
             filtered_data = filtered_data.map((commit_block) -> {
               commit_id: commit_block.commit_id,
