@@ -31,7 +31,6 @@ class window.HistoryFlow
     WIDTH = $("#history_flow").width()
     HEIGHT = $("#history_flow").height()
 
-
     selected_index = null
     filtered_data = @data
 
@@ -54,13 +53,12 @@ class window.HistoryFlow
       .attr("fill", "white")
       .attr("width", WIDTH)
       .attr("height", HEIGHT)
-      .on("click", =>
+      .on "click", =>
         @state = "NORMAL"
         $(".cb_blame").show()
         selected_index = null
         reset()
         updater()
-      )
 
     reset = =>
       d3.selectAll(".hf_scale_handle").classed("selected_block", false)
@@ -99,22 +97,28 @@ class window.HistoryFlow
         .attr("id", (d) -> "blame_#{d.blame_id}")
         .attr("class", (d) -> "cb_blame commit_#{d.commit_id}")
         .style("transform", (d, i) -> "translate(0, #{d.y0 * PRE_HEIGHT}px)")
-        .on("mouseover", ->
-
-          console.log "over"
+        .on("mouseover", (d) ->
+          hf_blame.classed("faded_blame_block", (blame) -> blame.commit_id != d.commit_id)
+          hf_blame.classed("hover_block", (blame) -> blame.blame_id == d.blame_id)
+          $(".cb_commit .commit_#{d.commit_id}")
+            #.not(this)
+            .css("background-color", color(d.commit_number))
+          console.log d
+        )
+        .on("mouseout", (d) ->
+          hf_blame.classed("faded_blame_block", false)
+          $(".cb_commit .commit_#{d.commit_id}")
+            .css("background-color", "")
         )
 
       cb_code = cb_blame.selectAll(".cb_code_block")
         .data((d) -> d.content)
 
-      #console.log cb_code.enter()
-
       cb_code
         .enter()
         .append("pre")
         .attr("class", "cb_code_block")
-        .text((d) -> d)
-
+        .text((d) -> if d == "" then " " else d)
 
       hf_scale_handle = svg.selectAll(".hf_scale_handle")
         .data(stacked_data, (d) -> d.commit_id)
@@ -163,7 +167,6 @@ class window.HistoryFlow
       hf_commit = svg.selectAll(".hf_commit")
         .data(stacked_data, (d) -> d.commit_id)
 
-
       hf_commit
         .enter().append("g")
         .attr("class", (d) -> "hf_commit commit_#{d.commit_id}")
@@ -176,7 +179,6 @@ class window.HistoryFlow
       hf_commit
         .exit()
         .remove()
-
 
       hf_blame = hf_commit.selectAll(".hf_blame")
         .data(((d) -> d.blame_content_array), (d) -> d.blame_id)
