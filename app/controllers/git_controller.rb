@@ -54,6 +54,8 @@ class GitController < ApplicationController
       md5 << c.author_email
       commit_hash = c.to_hash
       commit_hash[:gravatar] = md5.hexdigest
+      commit_hash[:authored_date] = commit_hash[:authored_date].utc.to_i*1000
+      commit_hash[:committed_date] = commit_hash[:committed_date].utc.to_i*1000
       commit_hash
     end
 
