@@ -1,5 +1,6 @@
 FolderPath = "."
 FilePath = 'app/controllers/git_controller.rb'
+
 #FilePath = 'app/assets/javascripts/history_flow.coffee'
 
 #FolderPath = "/Users/deity/jquery.transit"
@@ -10,6 +11,7 @@ FilePath = 'app/controllers/git_controller.rb'
 
 class GitController < ApplicationController
   def raw_data
+    md5 = Digest::MD5.new
     repo = Gitlab::Git::Repository.new(FolderPath)
     commits = Gitlab::Git::Commit.where({
       repo: repo,
@@ -19,11 +21,14 @@ class GitController < ApplicationController
     })
 
     commitHashTable = {}
+    histories = []
 
     blame_data = commits.reverse.each_with_index.map do |c, commit_i|
+      
       blob = Gitlab::Git::Blob.find(repo, c.id, FilePath) 
       blame = Rugged::Blame.new(repo.rugged, FilePath, { newest_commit: c.id })
       
+      history = {}
       commitHashTable[c.id] = commit_i
 
       blame_content_array = blame.each_with_index.map do |b, blame_i|
@@ -42,12 +47,21 @@ class GitController < ApplicationController
         }
       end
 
+      # compute md5 of mail for gravatar
+      md5 << c.author_email
+      history[:id] = c.id
+      history[:author_email] = c.author_email
+      history[:gravatar] = md5.hexdigest
+      history[:message] = c.message
+      history[:author_name] = c.author_name
+      histories << history
+
       {commit_id: c.id[0..7], 
        blame_content_array: blame_content_array}
     end
 
     author_data = commits.group_by { |c| c.author_name }
-    history_data = { numberOfCommit: commits.length, commits: commits }
+    history_data = { numberOfCommit: commits.length, history: histories}
     {blame_data: blame_data, author_data: author_data, history_data: history_data}
   
     #commits.reverse.each_with_index do |c, cIndex|

@@ -2,7 +2,7 @@
 // cb_ prefix for code block related parts
 // Thanks to Bok
 
-$sidebar_width: 200px;
+$sidebar_width: 300px;
 $commit_block_width: 500px;
 $history_flow_height: 180px;
 $sidebar_color: #CCC;
@@ -154,6 +154,10 @@ html, body {
 
 /* Toggle Styles */
 
+.menu_gravatar{
+  width: 40px;
+}
+
 #wrapper {
     padding-left: 0;
     -webkit-transition: all 0.5s ease;
@@ -192,7 +196,7 @@ html, body {
 
 #wrapper.toggled #page-content-wrapper {
     position: absolute;
-    margin-right: -$sidebar_width;
+    margin-bottom: -$sidebar_width;
 }
 
 /* Sidebar Styles */
@@ -207,8 +211,9 @@ html, body {
 }
 
 .sidebar-nav li {
-    text-indent: 20px;
-    line-height: 40px;
+    text-indent: 5px;
+    margin-top: 3px;
+    //line-height: 40px;
 }
 
 .sidebar-nav li a {
