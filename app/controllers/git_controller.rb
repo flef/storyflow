@@ -10,8 +10,13 @@ FilePath = 'app/controllers/git_controller.rb'
 #FilePath = "js/game_manager.js"
 
 class GitController < ApplicationController
-  def raw_data
-    md5 = Digest::MD5.new
+
+  def sumDigits(num, base = 10)
+    num.to_s(base).split(//).inject(0) {|z, x| z + x.to_i(base)}
+  end
+
+
+  def raw_data    
     repo = Gitlab::Git::Repository.new(FolderPath)
     commits = Gitlab::Git::Commit.where({
       repo: repo,
@@ -53,9 +58,12 @@ class GitController < ApplicationController
 
     # compute md5 of mail for gravatar
     history_commits = commits.map do |c|
+      md5 = Digest::MD5.new
       md5 << c.author_email
+      hash = md5.hexdigest
+      hash.gsub! '\w', ''
       commit_hash = c.to_hash
-      commit_hash[:gravatar] = md5.hexdigest
+      commit_hash[:gravatar] = hash.split(//).inject(0) {|z, x| z + x.to_i(10)}
       commit_hash[:authored_date] = commit_hash[:authored_date].utc.to_i*1000
       commit_hash[:committed_date] = commit_hash[:committed_date].utc.to_i*1000
       commit_hash
