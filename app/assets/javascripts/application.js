@@ -18,3 +18,4 @@
 //= require util
 //= require controller
 //= require history_flow
+//= require bootstrap
