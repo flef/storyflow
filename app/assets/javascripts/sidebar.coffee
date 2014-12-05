@@ -5,7 +5,7 @@ class window.Sidebar
       console.log commit   
       $("ul.sidebar-nav").append("
         <li class='menu commit_#{commit.id.substr(0, 8)}'>
-        <img class='menu_gravatar' src='http://www.gravatar.com/avatar/#{commit.gravatar}' />
+        <img class='menu_gravatar img-rounded' src='http://www.gravatar.com/avatar/#{commit.gravatar}' />
         #{commit.message.substr(0, 50)} </li>"
       )
       continue
