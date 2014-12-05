@@ -5,10 +5,12 @@ SCROLL_MARGIN_TOP = 20
 BLOCK_WIDTH = 500
 PRE_HEIGHT = 14
 SCALE_HANDLE_HEIGHT = 25
-SCALE_HANDLE_MARGIN = SCALE_HANDLE_HEIGHT + 2
+CURRENT_COMMITS_HEIGHT = 2
+SCALE_HANDLE_MARGIN = SCALE_HANDLE_HEIGHT + CURRENT_COMMITS_HEIGHT
 
-RIGHT_COLOR_SCALE = "#FDFFCB"
-LEFT_COLOR_SCALE = "#232942"
+#RIGHT_COLOR_SCALE = "#FDFFCB"
+LEFT_COLOR_SCALE = "#FDFFCB"
+RIGHT_COLOR_SCALE = "#232942"
 
 class window.HistoryFlow
   state: "NORMAL"
@@ -33,6 +35,9 @@ class window.HistoryFlow
 
     selected_index = null
     filtered_data = @data
+
+    #isOnScreen = (elem) ->
+      #console.log $("#code_blocks").scrollLeft(), $(elem).left()
 
     x = d3.scale.ordinal().rangeBands([0, WIDTH])
     y = d3.scale.linear().range([0, HEIGHT - SCALE_HANDLE_MARGIN])
@@ -60,6 +65,28 @@ class window.HistoryFlow
         reset()
         updater()
 
+    getCommitsOnScreen = ->
+      code_blocks = $("#code_blocks")
+      scroll_left = code_blocks.scrollLeft()
+      screen_width = code_blocks.width()
+
+      start = Math.floor(scroll_left / (BLOCK_WIDTH + MARGIN))
+      end = Math.floor((scroll_left + screen_width) / (BLOCK_WIDTH + MARGIN))
+
+      #console.log $(".hf_current_commits:nth-child(n+4):nth-child(-n+8)")
+
+      hf_current_commits = svg.selectAll(".hf_current_commits")
+        #.selectAll("nth-child(n+4):nth-child(-n+8)")
+
+
+      console.log hf_current_commits
+
+      console.log start, end
+      console.log scroll_left, screen_width
+
+    $("#code_blocks").scroll (e) ->
+      getCommitsOnScreen()
+
     reset = =>
       d3.selectAll(".hf_scale_handle").classed("selected_block", false)
       filtered_data = @data
@@ -83,13 +110,24 @@ class window.HistoryFlow
         .attr("id", (d) -> "commit_#{d.commit_id}")
         .attr("class", (d) -> "cb_commit")
         .style("left", (d, i) -> "#{i * (BLOCK_WIDTH + MARGIN)}px")
+        .on("mouseover", (d) ->
+          hf_scale_handle.classed("hover_block", (handle) -> handle.commit_id == d.commit_id))
+        .on("mouseout", (d) ->
+          hf_scale_handle.classed("hover_block", false))
 
       cb_div
         .exit()
-        .remove()
+       .remove()
 
       cb_blame = cb_div.selectAll(".cb_blame")
         .data(((d) -> d.blame_content_array), (d) -> d.blame_id)
+
+      cb_blame
+        .exit()
+        .remove()
+
+      cb_blame
+        .style("transform", (d, i) -> "translate(0, #{d.y0 * PRE_HEIGHT}px)")
 
       cb_blame
         .enter()
@@ -103,7 +141,6 @@ class window.HistoryFlow
           $(".cb_commit .commit_#{d.commit_id}")
             #.not(this)
             .css("background-color", color(d.commit_number))
-          console.log d
         )
         .on("mouseout", (d) ->
           hf_blame.classed("faded_blame_block", false)
@@ -138,9 +175,9 @@ class window.HistoryFlow
         .attr("class", (d) -> "hf_scale_handle")
         .style("fill", (d, i) -> color(i))
         .attr("width", x.rangeBand())
+        .attr("height", SCALE_HANDLE_HEIGHT)
         .attr("y", 0)
         .attr("transform", (d) -> "translate(#{x(d.commit_id)}, 0)")
-        .attr("height", SCALE_HANDLE_HEIGHT)
         .on("mouseover", (d) ->
           d3.select(this).classed("hover_block", true)
           d3.select(".hf_commit.commit_#{d.commit_id}").classed("hover_block", true))
@@ -164,6 +201,19 @@ class window.HistoryFlow
             else
               selected_index = i)
 
+      hf_current_commits = svg.selectAll(".hf_current_commits")
+        .data(stacked_data, (d) -> d.commit_id)
+
+      hf_current_commits
+        .enter()
+        .append("rect")
+        .attr("class", "hf_current_commits")
+        .attr("y", SCALE_HANDLE_HEIGHT)
+        .attr("width", x.rangeBand())
+        .attr("height", CURRENT_COMMITS_HEIGHT)
+        .attr("fill", "red")
+        .attr("transform", (d) -> "translate(#{x(d.commit_id)}, 0)")
+
       hf_commit = svg.selectAll(".hf_commit")
         .data(stacked_data, (d) -> d.commit_id)
 
@@ -171,6 +221,13 @@ class window.HistoryFlow
         .enter().append("g")
         .attr("class", (d) -> "hf_commit commit_#{d.commit_id}")
         .attr("transform", (d) -> "translate(#{x(d.commit_id)}, #{SCALE_HANDLE_MARGIN})")
+        .on("mouseover", (d) ->
+          #console.log d
+      #d3.selectAll(".hf_scale_handle").classed("selected_block", false)
+          hf_scale_handle.classed("selectd_block", (handle) ->
+            console.log handle, d
+            handle.commit_id == d.commit_id )
+        )
 
       hf_commit
         .transition()
@@ -203,6 +260,7 @@ class window.HistoryFlow
 
       hf_blame
         .on("mouseover", (d, i) ->
+
           d3.select(this).classed("hover_block", true)
           hf_blame.classed("faded_blame_block", (blame) -> blame.commit_id != d.commit_id)
 
@@ -215,6 +273,7 @@ class window.HistoryFlow
           blame_div
             .css("background-color", color(d.commit_number))
             .addClass('highlight_blame'))
+
 
         .on("mouseout", (d) ->
           d3.select(this).classed("hover_block", false)

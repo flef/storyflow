@@ -20,7 +20,7 @@ class GitController < ApplicationController
 
     commitHashTable = {}
 
-    blame_data = commits.reverse.each_with_index.map do |c, commit_i|
+    blame_data = commits.each_with_index.map do |c, commit_i|
       blob = Gitlab::Git::Blob.find(repo, c.id, FilePath) 
       blame = Rugged::Blame.new(repo.rugged, FilePath, { newest_commit: c.id })
       
