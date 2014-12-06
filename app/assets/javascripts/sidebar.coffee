@@ -62,4 +62,4 @@ class window.Sidebar
       e.preventDefault()
       $("#wrapper").toggleClass("toggled")
 
-    $("#menu-toggle").trigger("click")
+    #$("#menu-toggle").trigger("click")
