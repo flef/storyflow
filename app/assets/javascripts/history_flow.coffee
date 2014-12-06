@@ -127,10 +127,10 @@ class window.HistoryFlow
 
       cb_blame
         .style("transform", (d, i) -> "translate(0, #{d.y0 * PRE_HEIGHT}px)")
-        #.style("background-color", (d) ->
-          #color = d3.rgb(color(d.commit_number))
-          #return "rgba(#{color.r}, #{color.g}, #{color.b}, 0.2)"
-        #)
+        .style("background-color", (d) ->
+          bg = d3.rgb(color(d.commit_number))
+          return "rgba(#{bg.r}, #{bg.g}, #{bg.b}, 0.2)"
+        )
 
       cb_blame
         .enter()
@@ -138,13 +138,12 @@ class window.HistoryFlow
         .attr("id", (d) -> "blame_#{d.blame_id}")
         .attr("class", (d) -> "cb_blame commit_#{d.commit_id}")
         .style("transform", (d, i) -> "translate(0, #{d.y0 * PRE_HEIGHT}px)")
-
         .style("background-color", (d) ->
           bg = d3.rgb(color(d.commit_number))
           return "rgba(#{bg.r}, #{bg.g}, #{bg.b}, 0.2)"
         )
 
-        .on("mouseover", (d) ->
+        .on("mouseenter", (d) ->
           hf_blame
             .filter((blame) -> blame.commit_id != d.commit_id)
             .transition()
@@ -164,7 +163,7 @@ class window.HistoryFlow
                 return d3.interpolate(start_str, end_str)
             )
         )
-        .on("mouseout", (d) ->
+        .on("mouseleave", (d) ->
           hf_blame
             .filter((blame) -> blame.commit_id != d.commit_id)
             .transition()
