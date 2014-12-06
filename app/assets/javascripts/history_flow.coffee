@@ -11,6 +11,8 @@ SCALE_HANDLE_MARGIN = SCALE_HANDLE_HEIGHT + CURRENT_COMMITS_HEIGHT
 RIGHT_COLOR_SCALE = "#FDFFCB"
 LEFT_COLOR_SCALE = "#232942"
 
+OPACITY_DURATION = 120
+
 class window.HistoryFlow
   state: "NORMAL"
   width: 0
@@ -133,14 +135,28 @@ class window.HistoryFlow
         .attr("class", (d) -> "cb_blame commit_#{d.commit_id}")
         .style("transform", (d, i) -> "translate(0, #{d.y0 * PRE_HEIGHT}px)")
         .on("mouseover", (d) ->
-          hf_blame.classed("faded_blame_block", (blame) -> blame.commit_id != d.commit_id)
+          hf_blame
+            .filter((blame) -> blame.commit_id != d.commit_id)
+            .transition()
+            .duration(OPACITY_DURATION)
+            .attr("opacity", 0.2)
+
           hf_blame.classed("hover_block", (blame) -> blame.blame_id == d.blame_id)
+
           $(".cb_commit .commit_#{d.commit_id}")
             #.not(this)
             .css("background-color", color(d.commit_number))
+            #.transition()
+            #.duration(OPACITY_DURATION)
+            #.attr("opacity", 0.2)
         )
         .on("mouseout", (d) ->
-          hf_blame.classed("faded_blame_block", false)
+          hf_blame
+            .filter((blame) -> blame.commit_id != d.commit_id)
+            .transition()
+            .duration(OPACITY_DURATION)
+            .attr("opacity", 1)
+
           $(".cb_commit .commit_#{d.commit_id}")
             .css("background-color", "")
         )
@@ -258,7 +274,10 @@ class window.HistoryFlow
           d3.select(this).classed("hover_block", true)
           svg
             .selectAll(".hf_blame")
-            .classed("faded_blame_block", (blame) -> blame.commit_id != d.commit_id)
+            .filter((blame) -> blame.commit_id != d.commit_id)
+            .transition()
+            .duration(OPACITY_DURATION)
+            .attr("opacity", 0.2)
 
           blame_div = $("#blame_#{d.blame_id}")
           commit_div = blame_div.parent()
@@ -274,7 +293,10 @@ class window.HistoryFlow
           d3.select(this).classed("hover_block", false)
           svg
             .selectAll(".hf_blame")
-            .classed("faded_blame_block", false)
+            .filter((blame) -> blame.commit_id != d.commit_id)
+            .transition()
+            .duration(OPACITY_DURATION)
+            .attr("opacity", 1)
 
           $(".cb_commit .commit_#{d.commit_id}").css("background-color", "")
           $("#blame_#{d.blame_id}").removeClass('highlight_blame'))
