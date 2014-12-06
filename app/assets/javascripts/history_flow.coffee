@@ -40,7 +40,7 @@ class window.HistoryFlow
     x = d3.scale.ordinal().rangeBands([0, WIDTH])
     y = d3.scale.linear().range([0, HEIGHT - SCALE_HANDLE_MARGIN])
 
-    color = d3.scale.linear()
+    window.color = d3.scale.linear()
              .range([LEFT_COLOR_SCALE, RIGHT_COLOR_SCALE])
              .domain([0, data.length])
              .interpolate(d3.interpolateHsl)
@@ -127,6 +127,10 @@ class window.HistoryFlow
 
       cb_blame
         .style("transform", (d, i) -> "translate(0, #{d.y0 * PRE_HEIGHT}px)")
+        #.style("background-color", (d) ->
+          #color = d3.rgb(color(d.commit_number))
+          #return "rgba(#{color.r}, #{color.g}, #{color.b}, 0.2)"
+        #)
 
       cb_blame
         .enter()
@@ -134,6 +138,12 @@ class window.HistoryFlow
         .attr("id", (d) -> "blame_#{d.blame_id}")
         .attr("class", (d) -> "cb_blame commit_#{d.commit_id}")
         .style("transform", (d, i) -> "translate(0, #{d.y0 * PRE_HEIGHT}px)")
+
+        .style("background-color", (d) ->
+          bg = d3.rgb(color(d.commit_number))
+          return "rgba(#{bg.r}, #{bg.g}, #{bg.b}, 0.2)"
+        )
+
         .on("mouseover", (d) ->
           hf_blame
             .filter((blame) -> blame.commit_id != d.commit_id)
@@ -143,12 +153,16 @@ class window.HistoryFlow
 
           hf_blame.classed("hover_block", (blame) -> blame.blame_id == d.blame_id)
 
-          $(".cb_commit .commit_#{d.commit_id}")
-            #.not(this)
-            .css("background-color", color(d.commit_number))
-            #.transition()
-            #.duration(OPACITY_DURATION)
-            #.attr("opacity", 0.2)
+          d3.selectAll(".cb_commit .commit_#{d.commit_id}")
+            .transition()
+            .duration(OPACITY_DURATION)
+            .styleTween("background-color",
+              (d, i, a) ->
+                start = d3.rgb(color(d.commit_number))
+                start_str = "rgba(#{start.r}, #{start.g}, #{start.b}, 0.2)"
+                end_str = "rgba(#{start.r}, #{start.g}, #{start.b}, 0.99)"
+                return d3.interpolate(start_str, end_str)
+            )
         )
         .on("mouseout", (d) ->
           hf_blame
@@ -157,8 +171,16 @@ class window.HistoryFlow
             .duration(OPACITY_DURATION)
             .attr("opacity", 1)
 
-          $(".cb_commit .commit_#{d.commit_id}")
-            .css("background-color", "")
+          d3.selectAll(".cb_commit .commit_#{d.commit_id}")
+            .transition()
+            .duration(OPACITY_DURATION)
+            .styleTween("background-color",
+              (d, i, a) ->
+                start = d3.rgb(color(d.commit_number))
+                start_str = "rgba(#{start.r}, #{start.g}, #{start.b}, 0.99)"
+                end_str = "rgba(#{start.r}, #{start.g}, #{start.b}, 0.2)"
+                return d3.interpolate(start_str, end_str)
+            )
         )
 
       cb_code = cb_blame.selectAll(".cb_code_block")
