@@ -199,11 +199,13 @@ class window.HistoryFlow
             else
               selected_index = i)
 
+      svg.select("#hf_current_commits_container")
+        .selectAll(".hf_current_commits")
+        .remove() # Redraw the red bar everytime to ensure that the bars are in correct order
+
       hf_current_commits = svg.select("#hf_current_commits_container")
         .selectAll(".hf_current_commits")
         .data(stacked_data, (d) -> d.commit_id)
-
-      hf_current_commits
         .enter()
         .append("rect")
         .attr("class", "hf_current_commits")
@@ -212,6 +214,7 @@ class window.HistoryFlow
         .attr("height", CURRENT_COMMITS_HEIGHT)
         .attr("fill", "black")
         .attr("transform", (d) -> "translate(#{x(d.commit_id)}, 0)")
+
 
       hf_commit = svg.selectAll(".hf_commit")
         .data(stacked_data, (d) -> d.commit_id)
@@ -253,7 +256,6 @@ class window.HistoryFlow
 
       hf_blame
         .on("mouseover", (d, i) ->
-
           d3.select(this).classed("hover_block", true)
           hf_blame.classed("faded_blame_block", (blame) -> blame.commit_id != d.commit_id)
 
@@ -266,7 +268,6 @@ class window.HistoryFlow
           blame_div
             .css("background-color", color(d.commit_number))
             .addClass('highlight_blame'))
-
 
         .on("mouseout", (d) ->
           d3.select(this).classed("hover_block", false)
@@ -305,5 +306,6 @@ class window.HistoryFlow
         .exit()
         .remove()
 
+      getCommitsOnScreen()
+
     updater()
-    getCommitsOnScreen()
