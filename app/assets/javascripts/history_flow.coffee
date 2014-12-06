@@ -215,7 +215,6 @@ class window.HistoryFlow
         .attr("fill", "black")
         .attr("transform", (d) -> "translate(#{x(d.commit_id)}, 0)")
 
-
       hf_commit = svg.selectAll(".hf_commit")
         .data(stacked_data, (d) -> d.commit_id)
 
@@ -257,7 +256,9 @@ class window.HistoryFlow
       hf_blame
         .on("mouseover", (d, i) ->
           d3.select(this).classed("hover_block", true)
-          hf_blame.classed("faded_blame_block", (blame) -> blame.commit_id != d.commit_id)
+          svg
+            .selectAll(".hf_blame")
+            .classed("faded_blame_block", (blame) -> blame.commit_id != d.commit_id)
 
           blame_div = $("#blame_#{d.blame_id}")
           commit_div = blame_div.parent()
@@ -271,7 +272,10 @@ class window.HistoryFlow
 
         .on("mouseout", (d) ->
           d3.select(this).classed("hover_block", false)
-          hf_blame.classed("faded_blame_block", false)
+          svg
+            .selectAll(".hf_blame")
+            .classed("faded_blame_block", false)
+
           $(".cb_commit .commit_#{d.commit_id}").css("background-color", "")
           $("#blame_#{d.blame_id}").removeClass('highlight_blame'))
 
