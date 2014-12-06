@@ -6,6 +6,7 @@ $commit_block_width: 500px;
 $history_flow_height: 180px;
 $sidebar_color: #CCC;
 $code_line_height: 14px;
+$code_font_size: 12px;
 
 html, body {
   height: 100%;
@@ -43,7 +44,7 @@ html, body {
       .cb_code_block {
         overflow: hidden;
         margin: 0;
-        font-size: 12px;
+        font-size: $code_font_size;
         height: $code_line_height;
       }
 
@@ -152,10 +153,18 @@ html, body {
 
 /* Toggle Styles */
 
+$menu_li_height: 40px;
+$menu_li_margin: 3px;
+
+.menu_color {
+  float: right;
+  width: 20px;
+  height: $menu_li_height + $menu_li_margin;
+}
+
 .menu_gravatar{
   width: 40px;
 }
-
 
 .sidebar-nav .menu_separator {
     margin-top: 15px;
@@ -219,6 +228,7 @@ html, body {
 .sidebar-nav li {
     text-indent: 5px;
     margin-top: 3px;
+    /*height: 40px;*/
     //line-height: 40px;
 }
 

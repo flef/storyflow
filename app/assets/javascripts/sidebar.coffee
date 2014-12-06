@@ -19,11 +19,15 @@ class window.Sidebar
     weekNo
 	
   constructor: (@data) ->
-
+    history_length = @data.history.length
+    util = new Util(history_length)
     week = 0
-    for commit in @data.history
-      console.log commit
-      console.log week
+
+    for commit, index in @data.history
+      commit["commit_number"] = history_length - index
+
+      #console.log commit
+      #console.log week
 
       unless week is getWeekNumber commit.authored_date
         week = getWeekNumber commit.authored_date
@@ -38,24 +42,24 @@ class window.Sidebar
       $("ul.sidebar-nav").append("
         <li class='menu commit_#{commit.id.substr(0, 8)}'>
         <img class='menu_gravatar img-rounded' src='https://github.com/identicons/#{commit.gravatar}.png' title='#{commit.author_name}'/>
-        <span title='#{Date(commit.authored_date).toString()}'>#{commit.message.substr(0, 50)}</span></li>"
+        <span title='#{Date(commit.authored_date).toString()}'>#{commit.message.substr(0, 50)}</span>
+        <div class='menu_color' style='background-color: #{util.color(commit.commit_number)}'></div></li>"
       )
-      continue
 
-      $(document).ready -> # off-canvas sidebar toggle
-        $("[data-toggle=offcanvas]").click ->
-          $(this).toggleClass "visible-xs text-center"
-          $(this).find("i").toggleClass "glyphicon-chevron-right glyphicon-chevron-left"
-          $(".row-offcanvas").toggleClass "active"
-          $("#lg-menu").toggleClass("hidden-xs").toggleClass "visible-xs"
-          $("#xs-menu").toggleClass("visible-xs").toggleClass "hidden-xs"
-          $("#btnShow").toggle()
-          return
-      return
+    $("[data-toggle=offcanvas]").click -> # off-canvas sidebar toggle
+      $(this).toggleClass "visible-xs text-center"
+      $(this).find("i").toggleClass "glyphicon-chevron-right glyphicon-chevron-left"
+      $(".row-offcanvas").toggleClass "active"
+      $("#lg-menu").toggleClass("hidden-xs").toggleClass "visible-xs"
+      $("#xs-menu").toggleClass("visible-xs").toggleClass "hidden-xs"
+      $("#btnShow").toggle()
 
     $(".menu").on "click", (e) ->
       commit = e.target.className.split(" ")[1]
       $("##{commit}").hide()
 
+    $("#menu-toggle").click (e) ->
+      e.preventDefault()
+      $("#wrapper").toggleClass("toggled")
 
-
+    $("#menu-toggle").trigger("click")

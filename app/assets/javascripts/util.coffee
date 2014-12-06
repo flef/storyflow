@@ -1,10 +1,24 @@
+RIGHT_COLOR_SCALE = "#FDFFCB"
+LEFT_COLOR_SCALE = "#232942"
+
 class window.Util
-  @generateColor: (commit_id) ->
-    return "##{commit_id.substr(0, 6)}"
+  color_obj: null
 
-  @generateRGBA: (commit_id, alpha = 0.2) ->
-    r = parseInt(commit_id.substr(0, 2), 16)
-    g = parseInt(commit_id.substr(2, 2), 16)
-    b = parseInt(commit_id.substr(4, 2), 16)
+  constructor: (number_of_commits) ->
+    @color_obj = d3.scale.linear()
+      .range([LEFT_COLOR_SCALE, RIGHT_COLOR_SCALE])
+      .domain([0, number_of_commits])
+      .interpolate(d3.interpolateHsl)
 
-    return "rgba(#{r}, #{g}, #{b}, #{alpha})"
+  color: (commit_num) -> @color_obj(commit_num)
+
+  stacker: (input_data) ->
+    for d in input_data
+      y0 = 0
+      d.blame_content_array = d.blame_content_array.map (obj) ->
+        obj.y0 = y0
+        y0 += obj.lines
+        return obj
+      d.total_line_count = y0
+
+    return input_data

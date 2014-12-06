@@ -8,43 +8,23 @@ SCALE_HANDLE_HEIGHT = 25
 CURRENT_COMMITS_HEIGHT = 2
 SCALE_HANDLE_MARGIN = SCALE_HANDLE_HEIGHT + CURRENT_COMMITS_HEIGHT
 
-RIGHT_COLOR_SCALE = "#FDFFCB"
-LEFT_COLOR_SCALE = "#232942"
-
 OPACITY_DURATION = 120
 IDLE_OPACITY = 0.2
 
 class window.HistoryFlow
   state: "NORMAL"
-  width: 0
-  height: 0
   data: null
 
-  stacker: (input_data) ->
-    for d in input_data
-      y0 = 0
-      d.blame_content_array = d.blame_content_array.map (obj) ->
-        obj.y0 = y0
-        y0 += obj.lines
-        return obj
-      d.total_line_count = y0
-
-    return input_data
-
-  constructor: (@data, numberOfCommit) ->
+  constructor: (@data) ->
     WIDTH = $("#history_flow").width()
     HEIGHT = $("#history_flow").height()
 
+    util = new Util(@data.length)
     selected_index = null
     filtered_data = @data
 
     x = d3.scale.ordinal().rangeBands([0, WIDTH])
     y = d3.scale.linear().range([0, HEIGHT - SCALE_HANDLE_MARGIN])
-
-    window.color = d3.scale.linear()
-             .range([LEFT_COLOR_SCALE, RIGHT_COLOR_SCALE])
-             .domain([0, data.length])
-             .interpolate(d3.interpolateHsl)
 
     svg = d3.select("#history_flow")
       .append("svg")
@@ -93,7 +73,7 @@ class window.HistoryFlow
       selected_index = null
 
     updater = =>
-      stacked_data = @stacker(filtered_data)
+      stacked_data = util.stacker(filtered_data)
       x.domain(stacked_data.map (d) -> d.commit_id)
       y.domain([0, d3.max(stacked_data, (d) -> d.total_line_count)])
 
@@ -129,7 +109,7 @@ class window.HistoryFlow
       cb_blame
         .style("transform", (d, i) -> "translate(0, #{d.y0 * PRE_HEIGHT}px)")
         .style("background-color", (d) ->
-          bg = d3.rgb(color(d.commit_number))
+          bg = d3.rgb(util.color(d.commit_number))
           return "rgba(#{bg.r}, #{bg.g}, #{bg.b}, 0.2)"
         )
 
@@ -140,7 +120,7 @@ class window.HistoryFlow
         .attr("class", (d) -> "cb_blame commit_#{d.commit_id}")
         .style("transform", (d, i) -> "translate(0, #{d.y0 * PRE_HEIGHT}px)")
         .style("background-color", (d) ->
-          bg = d3.rgb(color(d.commit_number))
+          bg = d3.rgb(util.color(d.commit_number))
           return "rgba(#{bg.r}, #{bg.g}, #{bg.b}, 0.2)")
         .on("mouseenter", (d) ->
           hf_blame
@@ -155,7 +135,7 @@ class window.HistoryFlow
             .duration(OPACITY_DURATION)
             .styleTween("background-color",
               (d, i, a) ->
-                start = d3.rgb(color(d.commit_number))
+                start = d3.rgb(util.color(d.commit_number))
                 start_str = "rgba(#{start.r}, #{start.g}, #{start.b}, 0.2)"
                 end_str = "rgba(#{start.r}, #{start.g}, #{start.b}, 0.99)"
                 return d3.interpolate(start_str, end_str)))
@@ -171,7 +151,7 @@ class window.HistoryFlow
             .duration(OPACITY_DURATION)
             .styleTween("background-color",
               (d, i, a) ->
-                start = d3.rgb(color(d.commit_number))
+                start = d3.rgb(util.color(d.commit_number))
                 start_str = "rgba(#{start.r}, #{start.g}, #{start.b}, 0.99)"
                 end_str = "rgba(#{start.r}, #{start.g}, #{start.b}, 0.2)"
                 return d3.interpolate(start_str, end_str)))
@@ -180,16 +160,12 @@ class window.HistoryFlow
           if @state is "NORMAL"
             filtered_data = filtered_data.map((commit_block) -> {
               commit_id: commit_block.commit_id,
-              blame_content_array: commit_block.blame_content_array.filter (obj) -> obj.commit_id == d.commit_id
+              blame_content_array: commit_block.blame_content_array.filter((obj) ->
+                obj.commit_id == d.commit_id)
             }).filter (commit_block) -> commit_block.blame_content_array.length != 0
-
-            console.log filtered_data
 
             @state = "ENLARGED"
             updater()
-
-          else if @state is "ENLARGED"
-            $(".cb_blame").not(".commit_#{d.commit_id}").slideUp()
         )
 
       cb_code = cb_blame.selectAll(".cb_code_block")
@@ -218,7 +194,7 @@ class window.HistoryFlow
         .enter()
         .append("rect")
         .attr("class", (d) -> "hf_scale_handle")
-        .style("fill", (d, i) -> color(data.length-i))
+        .style("fill", (d, i) -> util.color(data.length-i))
         .attr("width", x.rangeBand())
         .attr("height", SCALE_HANDLE_HEIGHT)
         .attr("y", 0)
@@ -292,7 +268,7 @@ class window.HistoryFlow
         .enter()
         .append("rect")
         .attr("class", (d) -> "hf_blame hf_blame_block_#{d.commit_id}")
-        .style("fill", (d) -> color(d.commit_number))
+        .style("fill", (d) -> util.color(d.commit_number))
         .attr("width", x.rangeBand())
         .attr("y", 0)
         .attr("height", 0)
@@ -318,14 +294,14 @@ class window.HistoryFlow
             .duration(OPACITY_DURATION)
             .styleTween("background-color",
               (d, i, a) ->
-                start = d3.rgb(color(d.commit_number))
+                start = d3.rgb(util.color(d.commit_number))
                 start_str = "rgba(#{start.r}, #{start.g}, #{start.b}, 0.2)"
                 end_str = "rgba(#{start.r}, #{start.g}, #{start.b}, 0.99)"
                 return d3.interpolate(start_str, end_str)
             )
 
           blame_div
-            .css("background-color", color(d.commit_number))
+            .css("background-color", util.color(d.commit_number))
             .addClass('highlight_blame'))
 
         .on("mouseout", (d) ->
@@ -342,7 +318,7 @@ class window.HistoryFlow
             .duration(OPACITY_DURATION)
             .styleTween("background-color",
               (d, i, a) ->
-                start = d3.rgb(color(d.commit_number))
+                start = d3.rgb(util.color(d.commit_number))
                 start_str = "rgba(#{start.r}, #{start.g}, #{start.b}, 0.99)"
                 end_str = "rgba(#{start.r}, #{start.g}, #{start.b}, 0.2)"
                 return d3.interpolate(start_str, end_str)
@@ -368,15 +344,12 @@ class window.HistoryFlow
           if @state is "NORMAL"
             filtered_data = filtered_data.map((commit_block) -> {
               commit_id: commit_block.commit_id,
-              blame_content_array: commit_block.blame_content_array.filter (obj) -> obj.commit_id == d.commit_id
+              blame_content_array: commit_block.blame_content_array.filter((obj) ->
+                obj.commit_id == d.commit_id)
             }).filter (commit_block) -> commit_block.blame_content_array.length != 0
 
             @state = "ENLARGED"
-            updater()
-
-          #else if @state is "ENLARGED"
-            #$(".cb_blame").not(".commit_#{d.commit_id}").slideUp()
-        )
+            updater())
 
       hf_blame
         .exit()
