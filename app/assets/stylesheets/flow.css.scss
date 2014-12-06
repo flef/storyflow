@@ -5,6 +5,7 @@ $sidebar_width: 300px;
 $commit_block_width: 500px;
 $history_flow_height: 180px;
 $sidebar_color: #CCC;
+$code_line_height: 14px;
 
 html, body {
   height: 100%;
@@ -43,6 +44,7 @@ html, body {
         overflow: hidden;
         margin: 0;
         font-size: 12px;
+        height: $code_line_height;
       }
 
       .cb_blame {
