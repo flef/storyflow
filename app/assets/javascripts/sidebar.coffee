@@ -63,10 +63,51 @@ class window.Sidebar
         $(e.target).addClass("hover_menu")
         commit_data = @data.history[length - commit_number]
         sidebar_info.setInfo(commit_data)
-    )
+
+        svg = d3.select("#history_flow > svg")
+        svg
+          .selectAll(".hf_blame")
+          .filter((blame) -> blame.commit_id != commit_id)
+          .transition()
+          .duration(120)
+          .attr("opacity", 0.2)
+
+        d3.selectAll(".cb_commit .commit_#{commit_id}")
+          .transition()
+          .duration(120)
+          .styleTween("background-color",
+            (d, i, a) ->
+              start = d3.rgb(util.color(d.commit_number))
+              start_str = "rgba(#{start.r}, #{start.g}, #{start.b}, 0.2)"
+              end_str = "rgba(#{start.r}, #{start.g}, #{start.b}, 0.99)"
+              return d3.interpolate(start_str, end_str))
+
+        d3.select(".hf_commit.commit_#{commit_id}").classed("hover_block", true))
     .on("mouseleave", (e) ->
+
+      commit_id = $(this).data("commit_id")
       $(this).removeClass("hover_menu")
       sidebar_info.removeInfo()
+      d3.select(".hf_commit.commit_#{commit_id}").classed("hover_block", false)
+      svg = d3.select("#history_flow > svg")
+      svg
+        .selectAll(".hf_blame")
+        .filter((blame) -> blame.commit_id != commit_id)
+        .transition()
+        .duration(120)
+        .attr("opacity", 0.99)
+
+      d3.selectAll(".cb_commit .commit_#{commit_id}")
+        .transition()
+        .duration(120)
+        .styleTween("background-color",
+          (d, i, a) ->
+            start = d3.rgb(util.color(d.commit_number))
+            start_str = "rgba(#{start.r}, #{start.g}, #{start.b}, 0.99)"
+            end_str = "rgba(#{start.r}, #{start.g}, #{start.b}, 0.2)"
+            return d3.interpolate(start_str, end_str)
+        )
+    
     )
 
     $("[data-toggle=offcanvas]").click -> # off-canvas sidebar toggle

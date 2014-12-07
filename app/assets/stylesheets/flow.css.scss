@@ -154,7 +154,7 @@ html, body {
 /* Toggle Styles */
 
 $menu_li_height: 40px;
-$menu_li_margin: 3px;
+$menu_li_margin: 0px;
 
 #commit_info_user {
   float: left;
@@ -256,7 +256,7 @@ $menu_li_margin: 3px;
 
 .sidebar-nav li {
     text-indent: 5px;
-    margin-top: 3px;
+    /*margin-top: 3px;*/
     /*height: 40px;*/
     //line-height: 40px;
 }
