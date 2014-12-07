@@ -20,22 +20,30 @@ class window.SankeyFlow
     BLOCK_WIDTH = lineWidth
     MARGIN = spaceBetweenLines
 
+    blameY = (blameID, firstY = false) ->
+      console.log "#blame_" + blameID
+      if firstY
+        d3.select("#blame_" + blameID).data()[0].y0 * lineHeight +
+        d3.select("#blame_" + blameID).data()[0].content.length * lineHeight / 2
+      else
+        d3.select("#blame_" + blameID).data()[0].y0 * lineHeight 
+        #+ d3.select("#blame_" + blameID).data()[0].content.length * lineHeight / 2
+
     path = (d) ->
       x0 = 0
       x1 = MARGIN
       xi = d3.interpolateNumber(x0, x1)
       x2 = xi(curvature)
       x3 = xi(1 - curvature)
-      y0 = (d.srcY - 1) * lineHeight + d.dY * lineHeight / 2
-      y1 = (d.dstY - 1) * lineHeight + d.dY * lineHeight / 2
+      y0 = blameY(d.src, true) 
+      y1 = blameY(d.dst)+ d.start_line_number * lineHeight + d.lines_number * lineHeight / 2
       "M" + x0 + "," + y0 + "C" + x2 + "," + y0 + " " + x3 + "," + y1 + " " + x1 + "," + y1
-
 
     d3.select("#code_blocks").selectAll(".svg_container")
         .data(d3.entries(@data))
         .enter()
           .append("svg")
-          .style("left", (d, i) -> ((i + 1) * (MARGIN + BLOCK_WIDTH) - MARGIN) + "px")
+          .style("left", (d, i) -> (i * (MARGIN + BLOCK_WIDTH) - MARGIN) + "px")
           .attr("width", MARGIN)
           .attr("height", "3000px")
           .attr("class", "svg_container")
@@ -49,10 +57,8 @@ class window.SankeyFlow
             .attr("data-info", (d) -> d.info)
             .style("stroke-width", 
              (d) ->
-               (lineHeight) * d.dY
+               (lineHeight) * d.lines_number
              )
-
-
 
 ###*
 

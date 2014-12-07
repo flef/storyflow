@@ -1,7 +1,7 @@
 FolderPath = "."
-FilePath = 'app/controllers/git_controller.rb'
+#FilePath = 'app/controllers/git_controller.rb'
 
-#FilePath = 'app/assets/javascripts/history_flow.coffee'
+FilePath = 'app/assets/javascripts/sidebar.coffee'
 
 #FolderPath = "/Users/deity/jquery.transit"
 #FilePath = 'jquery.transit.js'
@@ -30,34 +30,50 @@ class GitController < ApplicationController
     previousBlames = {}
 
 
+  commits.each_with_index do |c, commit_i|
+        links[commit_i] = []
+        logger.info c.committed_date.inspect
+       
+        blob = Gitlab::Git::Blob.find(repo, c.id, FilePath) 
+        blame = Rugged::Blame.new(repo.rugged, FilePath, { newest_commit: c.id })
+
+        blame.each_with_index do |b, blame_i|
+          blameOrigCommitID = b[:final_commit_id]
+          if previousBlames[blameOrigCommitID]
+            previousBlames[blameOrigCommitID].each do |prevB|
+              link = {}              
+              link[:src] = prevB[:id]
+              link[:dst] = "#{commits.length - commit_i - 1}_#{blame_i}"
+              link[:lines_number] = prevB[:lines_in_hunk]
+              link[:start_line_number] = (prevB[:start_line_number] - b[:final_start_line_number]).abs
+              if (prevB[:start_line_number] - b[:final_start_line_number]).abs <= b[:lines_in_hunk]
+                links[commit_i] << link
+                logger.info link.inspect
+              end
+            end
+          end
+        end
+
+        
+
+        previousBlames = {}
+        blame.each_with_index do |b, blame_i|
+          blameOrigCommitID = b[:final_commit_id]
+          if blameOrigCommitID != c.id
+            previousBlames[blameOrigCommitID] = previousBlames[blameOrigCommitID] || []
+            previousBlames[blameOrigCommitID] << {id: "#{commits.length - commit_i - 1}_#{blame_i}", lines_in_hunk: b[:lines_in_hunk], start_line_number: b[:final_start_line_number] }
+          end 
+        end
+      end
+
+
+
+
     blame_data = commits.reverse.each_with_index.map do |c, commit_i|
-      links[commits.length - commit_i - 1] = []
-      
       blob = Gitlab::Git::Blob.find(repo, c.id, FilePath) 
       blame = Rugged::Blame.new(repo.rugged, FilePath, { newest_commit: c.id })
 
       commitHashTable[c.id] = commit_i
-      
-      blame.each_with_index do |b, blame_i|
-        blameOrigCommitID = b[:final_commit_id]
-        unless previousBlames[blameOrigCommitID].nil?
-          previousBlames[blameOrigCommitID].each do |prevB|
-            if (b[:orig_start_line_number] == prevB[:final_start_line_number] || (( b[:orig_start_line_number] - prevB[:final_start_line_number])).abs < prevB[:lines_in_hunk])
-              #startLine = b[:final_start_line_number] - 1
-              #endLine  = startLine + b[:lines_in_hunk] - 1   
-              link = {}              
-              link[:srcX] = commits.length - commit_i - 1
-              link[:dstX] = commits.length - commit_i
-              link[:srcY] = b[:final_start_line_number]
-              link[:dstY] = b[:orig_start_line_number]
-              link[:dY]   = b[:lines_in_hunk]
-              link[:info] = "FROM_C#{link[:srcX]}_B#{blame_i}_TO_C#{link[:dstX]}_B#{prevB[:index]}"
-              links[commits.length - commit_i - 1] << link #[previousBlames, link, b, blob.data.lines[startLine..endLine].each { |l| }] #link
-            end
-          end
-        end
-      end
-      previousBlames = {}
 
       blame_content_array = blame.each_with_index.map do |b, blame_i|
 
@@ -71,7 +87,7 @@ class GitController < ApplicationController
 
         #b
         { 
-          content: blob.data.lines[startLine..endLine].each { |l| },
+          content: blob.data.lines[startLine..endLine].each_with_index.map { |l, i| "#{i+startLine}.(#{i}) #{l}" },
           commit_number: commitHashTable[b[:orig_commit_id]],
           blame_id: "#{commit_i}_#{blame_i}",
           commit_id: b[:orig_commit_id][0..7],
@@ -103,59 +119,6 @@ class GitController < ApplicationController
     author_data = commits.group_by { |c| c.author_name }
     history_data = { numberOfCommit: commits.length, history: history_commits}
     {blame_data: blame_data, link_data: links, history_data: history_data}
-  
-    #commits.reverse.each_with_index do |c, cIndex|
-      #blob = Gitlab::Git::Blob.find(repo, c.id, FilePath) 
-      #blame = Rugged::Blame.new(repo.rugged, FilePath, { newest_commit: c.id })
-      #table[cIndex] = {}
-      #linesInHunk = {}
-      
-      #blame.each_with_index do |b, bIndex|
-        #table[cIndex][b[:final_commit_id][0..7]] ||= Array.new 
-        #table[cIndex][b[:final_commit_id][0..7]] << [nodeID, b]
-
-        #b_lines = b[:lines_in_hunk]
-        #startLine = b[:final_start_line_number] - 1
-        #endLine  = startLine + b[:lines_in_hunk] - 1      
-        
-        #node << {
-          #x: cIndex,
-          #row: bIndex,
-          #value: b_lines,
-          #content: blob.data.lines[startLine..endLine].join("\n"), 
-          #author: "c_#{cIndex}_b_#{bIndex}:#{b_lines}",
-          #commit: b[:final_commit_id][0..7], 
-          #name: "c_#{cIndex}_b_#{bIndex}",
-        #}
-
-        #linesInHunk[nodeID] = b_lines
-        #nodeID += 1
-      #end
-
-      #table[cIndex].each do |commitID, aLink|
-        #aLink.each do |destination|
-          #if commitID != c.id[0..7]
-              #table[cIndex-1][commitID].each do |source|
-                #if (destination.last[:final_start_line_number] - source.last[:orig_start_line_number]).abs < source.last[:lines_in_hunk]
-                  #link << {
-                    #source: source.first,
-                    #target: destination.first,
-                    #source_line: destination.last[:orig_start_line_number] - 1, 
-                    #target_line: destination.last[:final_start_line_number] - 1,
-                    #value: destination.last[:lines_in_hunk]
-                  #}
-                  ##, :debug => [source.last, destination.last]}
-                #end
-              #end
-          #end
-        #end
-      #end
-
-    #prevCommit = c.id[0..7]
-    #end
-      
-    #return {:nodes => node, :links => link}
-    #return {:nodes => node}
   end
 
   def data
