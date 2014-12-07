@@ -10,7 +10,7 @@ class window.Util
       .domain([0, number_of_commits])
       .interpolate(d3.interpolateHsl)
 
-    @author_color_obj = d3.scale.category20()
+    @author_color_obj = d3.scale.category10()
 
   color: (commit_num) -> @color_obj(commit_num)
 
