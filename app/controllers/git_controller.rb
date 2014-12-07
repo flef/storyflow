@@ -59,7 +59,9 @@ class GitController < ApplicationController
 
       {commit_id: c.id[0..7], 
        blame_content_array: blame_content_array,
-       author_number: authorHashTable[c.author_name][:author_num]}
+       author_number: authorHashTable[c.author_name][:author_num],
+       commit_number: commitHashTable[c.id][:commit_index]
+      }
     end
 
     blame_data = blame_data.reverse
