@@ -13,6 +13,7 @@ IDLE_OPACITY = 0.2
 
 class window.HistoryFlow
   state: "NORMAL"
+  menu_item: "AUTHOR"
   data: null
 
   constructor: (data) ->
@@ -126,10 +127,14 @@ class window.HistoryFlow
         .attr("id", (d) -> "blame_#{d.blame_id}")
         .attr("class", (d) -> "cb_blame commit_#{d.commit_id}")
         .style("transform", (d, i) -> "translate(0, #{d.y0 * PRE_HEIGHT}px)")
-        .style("background-color", (d) ->
-          bg = d3.rgb(util.color(d.commit_number))
-          return "rgba(#{bg.r}, #{bg.g}, #{bg.b}, 0.2)")
-        .on("mouseenter", (d) ->
+        .style("background-color", (d) =>
+          if @menu_item is "AUTHOR"
+            bg = d3.rgb(util.author_color(d.author_number))
+            return "rgba(#{bg.r}, #{bg.g}, #{bg.b}, 0.2)"
+          else
+            bg = d3.rgb(util.color(d.commit_number))
+            return "rgba(#{bg.r}, #{bg.g}, #{bg.b}, 0.2)")
+        .on("mouseenter", (d) =>
           commit_info = history_data.history[d.commit_number]
           sidebar_info.setInfo(commit_info)
 
@@ -144,12 +149,17 @@ class window.HistoryFlow
             .transition()
             .duration(OPACITY_DURATION)
             .styleTween("background-color",
-              (d, i, a) ->
-                start = d3.rgb(util.color(d.commit_number))
+              (d, i, a) =>
+                start = null
+                if @menu_item is "AUTHOR"
+                  start = d3.rgb(util.author_color(d.author_number))
+                else
+                  start = d3.rgb(util.color(d.commit_number))
+
                 start_str = "rgba(#{start.r}, #{start.g}, #{start.b}, 0.2)"
                 end_str = "rgba(#{start.r}, #{start.g}, #{start.b}, 0.99)"
                 return d3.interpolate(start_str, end_str)))
-        .on("mouseleave", (d) ->
+        .on("mouseleave", (d) =>
           sidebar_info.removeInfo()
           hf_blame
             .filter((blame) -> blame.commit_id != d.commit_id)
@@ -161,8 +171,15 @@ class window.HistoryFlow
             .transition()
             .duration(OPACITY_DURATION)
             .styleTween("background-color",
-              (d, i, a) ->
-                start = d3.rgb(util.color(d.commit_number))
+              (d, i, a) =>
+                start = null
+                if @menu_item is "AUTHOR"
+                  console.log "AUTHOR"
+                  start = d3.rgb(util.author_color(d.author_number))
+                else
+                  console.log "ELSE"
+                  start = d3.rgb(util.color(d.commit_number))
+
                 start_str = "rgba(#{start.r}, #{start.g}, #{start.b}, 0.99)"
                 end_str = "rgba(#{start.r}, #{start.g}, #{start.b}, 0.2)"
                 return d3.interpolate(start_str, end_str)))
@@ -205,7 +222,11 @@ class window.HistoryFlow
         .enter()
         .append("rect")
         .attr("class", (d) -> "hf_scale_handle")
-        .style("fill", (d, i) => util.color(blame_data.length - i))
+        .style("fill", (d, i) =>
+          if @menu_item is "AUTHOR"
+            util.author_color(d.author_number)
+          else
+            util.color(blame_data.length - i))
         .attr("width", x.rangeBand())
         .attr("height", SCALE_HANDLE_HEIGHT)
         .attr("y", 0)
@@ -280,7 +301,12 @@ class window.HistoryFlow
         .enter()
         .append("rect")
         .attr("class", (d) -> "hf_blame hf_blame_block_#{d.commit_id}")
-        .style("fill", (d) -> util.color(d.commit_number))
+        .style("fill", (d) =>
+          if @menu_item is "AUTHOR"
+            console.log d.blame_id, d.author_number
+            util.author_color(d.author_number)
+          else
+            util.color(d.commit_number))
         .attr("width", x.rangeBand())
         .attr("y", 0)
         .attr("height", 0)

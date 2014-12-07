@@ -34,7 +34,7 @@ class GitController < ApplicationController
       blob = Gitlab::Git::Blob.find(repo, c.id, FilePath) 
       blame = Rugged::Blame.new(repo.rugged, FilePath, { newest_commit: c.id })
       
-      commitHashTable[c.id] = commit_i
+      commitHashTable[c.id] = { commit_index: commit_i, commit: c }
 
       unless authorHashTable[c.author_name]
         authorHashTable[c.author_name] = author_num
@@ -48,18 +48,19 @@ class GitController < ApplicationController
         #b
         { 
           content: blob.data.lines[startLine..endLine].each { |l| l.delete!("\n") },
-          commit_number: commitHashTable[b[:orig_commit_id]],
+          commit_number: commitHashTable[b[:orig_commit_id]][:commit_index],
           blame_id: "#{commit_i}_#{blame_i}",
           commit_id: b[:orig_commit_id][0..7],
           final_line: b[:final_start_line_number],
           orig_line: b[:orig_start_line_number],
           lines: b[:lines_in_hunk],
-          author_number: authorHashTable[c.author_name]
+          author_number: authorHashTable[ commitHashTable[b[:orig_commit_id]][:commit].author_name ]
         }
       end
 
       {commit_id: c.id[0..7], 
-       blame_content_array: blame_content_array}
+       blame_content_array: blame_content_array,
+       author_number: authorHashTable[c.author_name]}
     end
 
     blame_data = blame_data.reverse
