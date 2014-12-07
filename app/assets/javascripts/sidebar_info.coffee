@@ -17,12 +17,13 @@ class window.SidebarInfo
     for author_name, author_data of author
       console.log author_name, author_data
       author_number = author_data.author_num
+      author_gravatar = author_data.author_gravatar
 
       $("#author_information").append("
       <div class='author_color'>
         <div class='author_info'>
           <img class='menu_gravatar img-rounded'
-            src='https://github.com/identicons/#{author_data.gravatar}.png'
+            src='https://github.com/identicons/#{author_gravatar}.png'
             title='#{author_name}'/>
           <span class='author_name'> #{author_name} </span>
         </div>

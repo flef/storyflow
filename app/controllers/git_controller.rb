@@ -36,7 +36,12 @@ class GitController < ApplicationController
       commitHashTable[c.id] = { commit_index: commit_i, commit: c }
 
       unless authorHashTable[c.author_name]
-        authorHashTable[c.author_name] = { author_num: author_num, author_gravatar: "hello" }
+        md5 = Digest::MD5.new
+        md5 << c.author_email
+        hash = md5.hexdigest
+        hash.gsub! '\w', ''
+        author_gravatar = hash.split(//).inject(0) {|z, x| z + x.to_i(10)}
+        authorHashTable[c.author_name] = { author_num: author_num, author_gravatar: author_gravatar }
         author_num += 1
       end
 
