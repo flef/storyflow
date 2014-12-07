@@ -19,4 +19,5 @@
 //= require controller
 //= require history_flow
 //= require sidebar
+//= require sidebar_info
 //= require bootstrap

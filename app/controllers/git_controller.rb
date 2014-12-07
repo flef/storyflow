@@ -63,6 +63,7 @@ class GitController < ApplicationController
       hash = md5.hexdigest
       hash.gsub! '\w', ''
       commit_hash = c.to_hash
+      commit_hash[:id] = c.id[0..7]
       commit_hash[:gravatar] = hash.split(//).inject(0) {|z, x| z + x.to_i(10)}
       commit_hash[:authored_date] = commit_hash[:authored_date].utc.to_i*1000
       commit_hash[:committed_date] = commit_hash[:committed_date].utc.to_i*1000

@@ -156,6 +156,31 @@ html, body {
 $menu_li_height: 40px;
 $menu_li_margin: 3px;
 
+#commit_info_user {
+  float: left;
+  width: 100%;
+  margin-top: 7px;
+  margin-left: 5px;
+}
+
+#commit_info_user_gravatar {
+  float: left;
+}
+
+#commit_info_user_name {
+  float: left;
+  margin-left: 10px;
+}
+
+#commit_info_message {
+  float: left;
+  p {
+    margin-top: 10px;
+    margin-left: 55px;
+    font-size: 13px;
+  }
+}
+
 .menu_color {
   float: right;
   width: 20px;

@@ -15,13 +15,18 @@ class window.HistoryFlow
   state: "NORMAL"
   data: null
 
-  constructor: (@data) ->
+  constructor: (data) ->
+    blame_data = data.blame_data
+    history_data = data.history_data
+
     WIDTH = $("#history_flow").width()
     HEIGHT = $("#history_flow").height()
 
-    util = new Util(@data.length)
+    sidebar_info = new SidebarInfo()
+    util = new Util(blame_data.length)
+
     selected_index = null
-    filtered_data = @data
+    filtered_data = blame_data
 
     x = d3.scale.ordinal().rangeBands([0, WIDTH])
     y = d3.scale.linear().range([0, HEIGHT - SCALE_HANDLE_MARGIN])
@@ -69,7 +74,7 @@ class window.HistoryFlow
 
     reset = =>
       d3.selectAll(".hf_scale_handle").classed("selected_block", false)
-      filtered_data = @data
+      filtered_data = blame_data
       selected_index = null
 
     updater = =>
@@ -110,8 +115,7 @@ class window.HistoryFlow
         .style("transform", (d, i) -> "translate(0, #{d.y0 * PRE_HEIGHT}px)")
         .style("background-color", (d) ->
           bg = d3.rgb(util.color(d.commit_number))
-          return "rgba(#{bg.r}, #{bg.g}, #{bg.b}, 0.2)"
-        )
+          return "rgba(#{bg.r}, #{bg.g}, #{bg.b}, 0.2)")
 
       cb_blame
         .enter()
@@ -123,6 +127,9 @@ class window.HistoryFlow
           bg = d3.rgb(util.color(d.commit_number))
           return "rgba(#{bg.r}, #{bg.g}, #{bg.b}, 0.2)")
         .on("mouseenter", (d) ->
+          commit_info = history_data.history[d.commit_number]
+          sidebar_info.setInfo(commit_info)
+
           hf_blame
             .filter((blame) -> blame.commit_id != d.commit_id)
             .transition()
@@ -140,6 +147,7 @@ class window.HistoryFlow
                 end_str = "rgba(#{start.r}, #{start.g}, #{start.b}, 0.99)"
                 return d3.interpolate(start_str, end_str)))
         .on("mouseleave", (d) ->
+          sidebar_info.removeInfo()
           hf_blame
             .filter((blame) -> blame.commit_id != d.commit_id)
             .transition()
@@ -194,7 +202,7 @@ class window.HistoryFlow
         .enter()
         .append("rect")
         .attr("class", (d) -> "hf_scale_handle")
-        .style("fill", (d, i) -> util.color(data.length-i))
+        .style("fill", (d, i) => util.color(blame_data.length - i))
         .attr("width", x.rangeBand())
         .attr("height", SCALE_HANDLE_HEIGHT)
         .attr("y", 0)
@@ -245,7 +253,8 @@ class window.HistoryFlow
         .enter().append("g")
         .attr("class", (d) -> "hf_commit commit_#{d.commit_id}")
         .attr("transform", (d) -> "translate(#{x(d.commit_id)}, #{SCALE_HANDLE_MARGIN})")
-        .on("mouseover", (d) -> hf_scale_handle.classed("selectd_block", (handle) -> handle.commit_id == d.commit_id ))
+        .on("mouseover", (d) ->
+          hf_scale_handle.classed("selectd_block", (handle) -> handle.commit_id == d.commit_id ))
 
       hf_commit
         .transition()
@@ -278,6 +287,9 @@ class window.HistoryFlow
 
       hf_blame
         .on("mouseover", (d, i) ->
+          commit_info = history_data.history[d.commit_number]
+          sidebar_info.setInfo(commit_info)
+
           d3.select(this).classed("hover_block", true)
           svg
             .selectAll(".hf_blame")
@@ -287,7 +299,9 @@ class window.HistoryFlow
             .attr("opacity", 0.2)
 
           blame_div = $("#blame_#{d.blame_id}")
-          commit_div = blame_div.parent()
+          blame_div
+            .css("background-color", util.color(d.commit_number))
+            .addClass('highlight_blame')
 
           d3.selectAll(".cb_commit .commit_#{d.commit_id}")
             .transition()
@@ -297,14 +311,10 @@ class window.HistoryFlow
                 start = d3.rgb(util.color(d.commit_number))
                 start_str = "rgba(#{start.r}, #{start.g}, #{start.b}, 0.2)"
                 end_str = "rgba(#{start.r}, #{start.g}, #{start.b}, 0.99)"
-                return d3.interpolate(start_str, end_str)
-            )
-
-          blame_div
-            .css("background-color", util.color(d.commit_number))
-            .addClass('highlight_blame'))
+                return d3.interpolate(start_str, end_str)))
 
         .on("mouseout", (d) ->
+          sidebar_info.removeInfo()
           d3.select(this).classed("hover_block", false)
           svg
             .selectAll(".hf_blame")

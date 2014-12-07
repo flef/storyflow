@@ -23,6 +23,7 @@ class window.Sidebar
     util = new Util(history_length)
     week = 0
 
+
     for commit, index in @data.history
       commit["commit_number"] = history_length - index
 
@@ -40,7 +41,7 @@ class window.Sidebar
         )
 
       $("ul.sidebar-nav").append("
-        <li class='menu commit_#{commit.id.substr(0, 8)}'>
+        <li class='menu commit_#{commit.id}'>
         <img class='menu_gravatar img-rounded' src='https://github.com/identicons/#{commit.gravatar}.png' title='#{commit.author_name}'/>
         <span title='#{Date(commit.authored_date).toString()}'>#{commit.message.substr(0, 50)}</span>
         <div class='menu_color' style='background-color: #{util.color(commit.commit_number)}'></div></li>"
