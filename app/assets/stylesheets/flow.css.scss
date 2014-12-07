@@ -156,6 +156,27 @@ html, body {
 $menu_li_height: 40px;
 $menu_li_margin: 0px;
 
+#author_information {
+  padding-left: 10px;
+  padding-top: 10px;
+}
+
+.author_color {
+  height: 30px;
+  font-size: 15px;
+
+  .author_info {
+    float: left;
+  }
+
+  .author_color_tab {
+    float: right;
+    background-color: pink;
+    height: 100%;
+    width: 40px;
+  }
+}
+
 #commit_info_user {
   float: left;
   width: 100%;

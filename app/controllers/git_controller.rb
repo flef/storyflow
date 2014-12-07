@@ -15,7 +15,6 @@ class GitController < ApplicationController
     num.to_s(base).split(//).inject(0) {|z, x| z + x.to_i(base)}
   end
 
-
   def raw_data    
     repo = Gitlab::Git::Repository.new(FolderPath)
     commits = Gitlab::Git::Commit.where({
@@ -26,13 +25,21 @@ class GitController < ApplicationController
     })
 
     commitHashTable = {}
+    authorHashTable = {}
+    author_num = 0
 
     blame_data = commits.reverse.each_with_index.map do |c, commit_i|
+      #logger.info c.inspect
       
       blob = Gitlab::Git::Blob.find(repo, c.id, FilePath) 
       blame = Rugged::Blame.new(repo.rugged, FilePath, { newest_commit: c.id })
       
       commitHashTable[c.id] = commit_i
+
+      unless authorHashTable[c.author_name]
+        authorHashTable[c.author_name] = author_num
+        author_num += 1
+      end
 
       blame_content_array = blame.each_with_index.map do |b, blame_i|
         startLine = b[:final_start_line_number] - 1
@@ -46,7 +53,8 @@ class GitController < ApplicationController
           commit_id: b[:orig_commit_id][0..7],
           final_line: b[:final_start_line_number],
           orig_line: b[:orig_start_line_number],
-          lines: b[:lines_in_hunk]
+          lines: b[:lines_in_hunk],
+          author_number: authorHashTable[c.author_name]
         }
       end
 
@@ -70,7 +78,9 @@ class GitController < ApplicationController
       commit_hash
     end
 
-    author_data = commits.group_by { |c| c.author_name }
+    author_data = authorHashTable
+
+    #author_data = commits.group_by { |c| c.author_name }
     history_data = { numberOfCommit: commits.length, history: history_commits}
     {blame_data: blame_data, author_data: author_data, history_data: history_data}
   

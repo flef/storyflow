@@ -16,6 +16,7 @@ class window.HistoryFlow
   data: null
 
   constructor: (data) ->
+    console.log data
     blame_data = data.blame_data
     history_data = data.history_data
 
@@ -23,6 +24,8 @@ class window.HistoryFlow
     HEIGHT = $("#history_flow").height()
 
     sidebar_info = new SidebarInfo()
+    sidebar_info.setAuthorData(data.author_data)
+
     util = new Util(blame_data.length)
 
     selected_index = null
