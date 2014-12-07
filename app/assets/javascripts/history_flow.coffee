@@ -244,31 +244,25 @@ class window.HistoryFlow
       hf_scale_handle
         .transition()
         .attr("transform", (d) -> "translate(#{x(d.commit_id)}, 0)")
-        .attr("width", x.rangeBand())
 
       hf_scale_handle
-        .enter()
-        .append("rect")
-        .attr("class", (d) -> "hf_scale_handle")
-        .style("fill", (d, i) =>
-          if @menu_item is "AUTHOR"
-            util.author_color(d.author_number)
-          else
-            util.color(blame_data.length - i))
-        .style("stroke", "black")
+        .selectAll("rect")
+        .transition()
         .attr("width", x.rangeBand())
-        .attr("height", (d) =>
-          console.log d
-          height = (remainders_data.commits[d.commit_id] || 0) * SCALE_HANDLE_HEIGHT
-          console.log remainders_data.commits[d.commit_id]
-          return height)
+
+      scale_g = hf_scale_handle
+        .enter()
+        .append("g")
+        .attr("class", (d) -> "hf_scale_handle")
         .attr("y", 0)
-        .attr("transform", (d) ->
-          height = (remainders_data.commits[d.commit_id] || 0) * SCALE_HANDLE_HEIGHT
-          y_translate = SCALE_HANDLE_HEIGHT - height
-          return "translate(#{x(d.commit_id)}, #{y_translate})")
+        .attr("transform", (d) -> "translate(#{x(d.commit_id)}, 0)")
         .on("mouseover", (d) ->
           d3.select(this).classed("hover_block", true)
+          d3.select(this).select("rect:nth-child(2)")
+            .attr("height", SCALE_HANDLE_HEIGHT)
+            .attr("stroke-width", 0)
+            .attr("y", 0)
+
           d3.select(".hf_commit.commit_#{d.commit_id}").classed("hover_block", true)
           commit_info = history_data.history[history_data.history.length - d.commit_number]
           sidebar_info.setInfo(commit_info)
@@ -280,6 +274,14 @@ class window.HistoryFlow
             .attr("opacity", 0.2))
         .on("mouseout", (d) ->
           d3.select(this).classed("hover_block", false)
+          d3.select(this).select("rect:nth-child(2)")
+            .attr("stroke-width", 1)
+            .attr("height", (d) => (remainders_data.commits[d.commit_id] || 0) * SCALE_HANDLE_HEIGHT)
+            .attr("y", (d) ->
+              height = (remainders_data.commits[d.commit_id] || 0) * SCALE_HANDLE_HEIGHT
+              SCALE_HANDLE_HEIGHT - height)
+
+
           d3.select(".hf_commit.commit_#{d.commit_id}").classed("hover_block", false)
           sidebar_info.removeInfo()
           svg
@@ -305,6 +307,27 @@ class window.HistoryFlow
             else
               selected_index = i)
 
+      scale_g
+        .append("rect")
+        .attr("height", SCALE_HANDLE_HEIGHT)
+        .attr("width", x.rangeBand())
+        .attr("fill", "white")
+
+      scale_g
+        .append("rect")
+        .style("fill", (d, i) =>
+          if @menu_item is "AUTHOR"
+            util.author_color(d.author_number)
+          else
+            util.color(blame_data.length - i))
+        .style("stroke", "black")
+        .attr("width", x.rangeBand())
+        .attr("height", (d) => (remainders_data.commits[d.commit_id] || 0) * SCALE_HANDLE_HEIGHT)
+        .attr("y", (d) ->
+          height = (remainders_data.commits[d.commit_id] || 0) * SCALE_HANDLE_HEIGHT
+          SCALE_HANDLE_HEIGHT - height
+        )
+
       svg.select("#hf_current_commits_container")
         .selectAll(".hf_current_commits")
         .remove() # Redraw the red bar everytime to ensure that the bars are in correct order
@@ -329,7 +352,7 @@ class window.HistoryFlow
         .attr("class", (d) -> "hf_commit commit_#{d.commit_id}")
         .attr("transform", (d) -> "translate(#{x(d.commit_id)}, #{SCALE_HANDLE_MARGIN})")
         .on("mouseover", (d) ->
-          hf_scale_handle.classed("selectd_block", (handle) -> handle.commit_id == d.commit_id ))
+          hf_scale_handle.classed("hover_block", (handle) -> handle.commit_id == d.commit_id ))
 
       hf_commit
         .transition()

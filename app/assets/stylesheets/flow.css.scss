@@ -98,8 +98,11 @@ html, body {
         }
 
         .selected_block {
-          fill: red !important;
-          opacity: 0.7;
+          rect {
+            fill: red !important;
+            opacity: 0.7;
+            stroke-width: 0;
+          }
         }
 
         .faded_blame_block {
