@@ -2,7 +2,6 @@ $ ->
   Prism.hooks.add 'after-highlight', (env) ->
     pre = env.element.parentNode
     data = $(pre.parentNode).children(".blame-data").data("blame")
-    console.log data
 
     return if (!pre || !/pre/i.test(pre.nodeName) || pre.className.indexOf('git-lines') is -1)
 

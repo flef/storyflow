@@ -138,7 +138,20 @@ html, body {
 /*}*/
 
 
+/*
+Link between node
+*/
+.link {
+  fill: none;
+  stroke: #000;
+  stroke-opacity: 0.2;
+}
 
+.svg_container {
+  position: absolute;
+  top: 0;
+  z-index: 1000;
+}
 
 
 

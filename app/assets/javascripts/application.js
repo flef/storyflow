@@ -20,3 +20,4 @@
 //= require history_flow
 //= require sidebar
 //= require bootstrap
+//= require flow

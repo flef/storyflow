@@ -1,3 +1,88 @@
+class window.SankeyFlow
+  constructor: (@data) ->
+    console.log  @data
+
+    margin =
+      top: 0
+      right: 0
+      bottom: 0
+      left: 0
+
+    width = 3000 - margin.left - margin.right
+    height = 5000 - margin.top - margin.bottom
+
+    curvature = .2
+
+    lineHeight = 14
+    lineWidth = 500
+    spaceBetweenLines = 100
+
+    BLOCK_WIDTH = lineWidth
+    MARGIN = spaceBetweenLines
+
+    path = (d) ->
+      x0 = 0
+      x1 = MARGIN
+      xi = d3.interpolateNumber(x0, x1)
+      x2 = xi(curvature)
+      x3 = xi(1 - curvature)
+      y0 = (d.srcY - 1) * lineHeight + d.dY * lineHeight / 2
+      y1 = (d.dstY - 1) * lineHeight + d.dY * lineHeight / 2
+      "M" + x0 + "," + y0 + "C" + x2 + "," + y0 + " " + x3 + "," + y1 + " " + x1 + "," + y1
+
+
+    d3.select("#code_blocks").selectAll(".svg_container")
+        .data(d3.entries(@data))
+        .enter()
+          .append("svg")
+          .style("left", (d, i) -> ((i + 1) * (MARGIN + BLOCK_WIDTH) - MARGIN) + "px")
+          .attr("width", MARGIN)
+          .attr("height", "3000px")
+          .attr("class", "svg_container")
+          .append("g")
+        .selectAll(".path")
+          .data((d) -> d.value)
+          .enter()
+            .append("path")
+            .attr("class", "link")
+            .attr("d", path)
+            .attr("data-info", (d) -> d.info)
+            .style("stroke-width", 
+             (d) ->
+               (lineHeight) * d.dY
+             )
+
+
+
+###*
+
+    d3.select("#code_blocks").selectAll(".link")
+        .data(@data)
+        .enter()
+          .append("svg")
+          .append("g")
+            .data((d) -> d)
+            .enter()
+              .append("path")
+
+
+        .style("left", (d, i) -> "#{i * (BLOCK_WIDTH + MARGIN)}px")
+        .data(@data)
+        .enter()
+          .append("svg")
+          .append("g")
+          .append("path")
+         .attr("class", "link")
+         .attr("d", path)
+         .style("stroke-width", 
+          (d) ->
+            lineHeight * d.dY
+          )
+
+###
+
+
+###*
 class AuthorBlock
   constructor: (@author_name, @commit_data) ->
     #console.log @author_name, @commit_data
@@ -24,4 +109,4 @@ class AuthorBlock
 
 $ ->
   window.controller = new Controller
-
+###

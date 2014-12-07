@@ -26,21 +26,52 @@ class GitController < ApplicationController
     })
 
     commitHashTable = {}
+    links = {}
+    previousBlames = {}
+
 
     blame_data = commits.reverse.each_with_index.map do |c, commit_i|
+      links[commits.length - commit_i - 1] = []
       
       blob = Gitlab::Git::Blob.find(repo, c.id, FilePath) 
       blame = Rugged::Blame.new(repo.rugged, FilePath, { newest_commit: c.id })
-      
+
       commitHashTable[c.id] = commit_i
+      
+      blame.each_with_index do |b, blame_i|
+        blameOrigCommitID = b[:final_commit_id]
+        unless previousBlames[blameOrigCommitID].nil?
+          previousBlames[blameOrigCommitID].each do |prevB|
+            if (b[:orig_start_line_number] == prevB[:final_start_line_number] || (( b[:orig_start_line_number] - prevB[:final_start_line_number])).abs < prevB[:lines_in_hunk])
+              #startLine = b[:final_start_line_number] - 1
+              #endLine  = startLine + b[:lines_in_hunk] - 1   
+              link = {}              
+              link[:srcX] = commits.length - commit_i - 1
+              link[:dstX] = commits.length - commit_i
+              link[:srcY] = b[:final_start_line_number]
+              link[:dstY] = b[:orig_start_line_number]
+              link[:dY]   = b[:lines_in_hunk]
+              link[:info] = "FROM_C#{link[:srcX]}_B#{blame_i}_TO_C#{link[:dstX]}_B#{prevB[:index]}"
+              links[commits.length - commit_i - 1] << link #[previousBlames, link, b, blob.data.lines[startLine..endLine].each { |l| }] #link
+            end
+          end
+        end
+      end
+      previousBlames = {}
 
       blame_content_array = blame.each_with_index.map do |b, blame_i|
+
+        blameOrigCommitID = b[:orig_commit_id]
+        b[:index] = blame_i
+        previousBlames[blameOrigCommitID] = previousBlames[blameOrigCommitID] || []
+        previousBlames[blameOrigCommitID] << b 
+
         startLine = b[:final_start_line_number] - 1
-        endLine  = startLine + b[:lines_in_hunk] - 1      
+        endLine  = startLine + b[:lines_in_hunk] - 1
 
         #b
         { 
-          content: blob.data.lines[startLine..endLine].each { |l| l.delete!("\n") },
+          content: blob.data.lines[startLine..endLine].each { |l| },
           commit_number: commitHashTable[b[:orig_commit_id]],
           blame_id: "#{commit_i}_#{blame_i}",
           commit_id: b[:orig_commit_id][0..7],
@@ -71,7 +102,7 @@ class GitController < ApplicationController
 
     author_data = commits.group_by { |c| c.author_name }
     history_data = { numberOfCommit: commits.length, history: history_commits}
-    {blame_data: blame_data, author_data: author_data, history_data: history_data}
+    {blame_data: blame_data, link_data: links, history_data: history_data}
   
     #commits.reverse.each_with_index do |c, cIndex|
       #blob = Gitlab::Git::Blob.find(repo, c.id, FilePath) 

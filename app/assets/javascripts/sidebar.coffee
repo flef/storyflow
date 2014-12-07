@@ -22,9 +22,6 @@ class window.Sidebar
 
     week = 0
     for commit in @data.history
-      console.log commit
-      console.log week
-
       unless week is getWeekNumber commit.authored_date
         week = getWeekNumber commit.authored_date
         date = new Date(commit.authored_date)
