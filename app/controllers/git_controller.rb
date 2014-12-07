@@ -29,7 +29,6 @@ class GitController < ApplicationController
     author_num = 0
 
     blame_data = commits.reverse.each_with_index.map do |c, commit_i|
-      #logger.info c.inspect
       
       blob = Gitlab::Git::Blob.find(repo, c.id, FilePath) 
       blame = Rugged::Blame.new(repo.rugged, FilePath, { newest_commit: c.id })
@@ -79,64 +78,31 @@ class GitController < ApplicationController
       commit_hash
     end
 
+    ###
+    # compute percent of remaining code by author and commit
+    ###
+    total_lines = 0.0
+    remainders_authors = {}
+    remainders_commits = {}
+
+    blame = Rugged::Blame.new(repo.rugged, FilePath, { newest_commit: commits.first.id })    
+    blame.each.map do |b|
+      total_lines += b[:lines_in_hunk]
+    end
+
+    blame.each.map do |b|
+      remainders_commits[b[:final_commit_id]] ||= 0
+      remainders_commits[b[:final_commit_id]] += b[:lines_in_hunk] / total_lines
+      remainders_authors[b[:final_signature][:email]] ||= 0
+      remainders_authors[b[:final_signature][:email]] += b[:lines_in_hunk] / total_lines      
+    end
+    ###
+    ###
+
     author_data = authorHashTable
 
-    #author_data = commits.group_by { |c| c.author_name }
     history_data = { numberOfCommit: commits.length, history: history_commits}
-    {blame_data: blame_data, author_data: author_data, history_data: history_data}
-  
-    #commits.reverse.each_with_index do |c, cIndex|
-      #blob = Gitlab::Git::Blob.find(repo, c.id, FilePath) 
-      #blame = Rugged::Blame.new(repo.rugged, FilePath, { newest_commit: c.id })
-      #table[cIndex] = {}
-      #linesInHunk = {}
-      
-      #blame.each_with_index do |b, bIndex|
-        #table[cIndex][b[:final_commit_id][0..7]] ||= Array.new 
-        #table[cIndex][b[:final_commit_id][0..7]] << [nodeID, b]
-
-        #b_lines = b[:lines_in_hunk]
-        #startLine = b[:final_start_line_number] - 1
-        #endLine  = startLine + b[:lines_in_hunk] - 1      
-        
-        #node << {
-          #x: cIndex,
-          #row: bIndex,
-          #value: b_lines,
-          #content: blob.data.lines[startLine..endLine].join("\n"), 
-          #author: "c_#{cIndex}_b_#{bIndex}:#{b_lines}",
-          #commit: b[:final_commit_id][0..7], 
-          #name: "c_#{cIndex}_b_#{bIndex}",
-        #}
-
-        #linesInHunk[nodeID] = b_lines
-        #nodeID += 1
-      #end
-
-      #table[cIndex].each do |commitID, aLink|
-        #aLink.each do |destination|
-          #if commitID != c.id[0..7]
-              #table[cIndex-1][commitID].each do |source|
-                #if (destination.last[:final_start_line_number] - source.last[:orig_start_line_number]).abs < source.last[:lines_in_hunk]
-                  #link << {
-                    #source: source.first,
-                    #target: destination.first,
-                    #source_line: destination.last[:orig_start_line_number] - 1, 
-                    #target_line: destination.last[:final_start_line_number] - 1,
-                    #value: destination.last[:lines_in_hunk]
-                  #}
-                  ##, :debug => [source.last, destination.last]}
-                #end
-              #end
-          #end
-        #end
-      #end
-
-    #prevCommit = c.id[0..7]
-    #end
-      
-    #return {:nodes => node, :links => link}
-    #return {:nodes => node}
+    {blame_data: blame_data, author_data: author_data, history_data: history_data, remainders_data: {authors: remainders_authors, commits: remainders_commits}}    
   end
 
   def data
