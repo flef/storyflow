@@ -94,8 +94,8 @@ class GitController < ApplicationController
 
     blame = Rugged::Blame.new(repo.rugged, FilePath, { newest_commit: commits.first.id })    
     blame.each.map do |b|
-      remainders_commits[b[:final_commit_id]] ||= 0
-      remainders_commits[b[:final_commit_id]] += b[:lines_in_hunk]
+      remainders_commits[b[:final_commit_id][0..7]] ||= 0
+      remainders_commits[b[:final_commit_id][0..7]] += b[:lines_in_hunk]
       remainders_authors[b[:final_signature][:email]] ||= 0
       remainders_authors[b[:final_signature][:email]] += b[:lines_in_hunk]     
       total_lines += b[:lines_in_hunk]
@@ -104,8 +104,8 @@ class GitController < ApplicationController
     max_remainders_commits = remainders_commits.max_by{ |k, v| v }.last.to_f
     max_remainders_authors = remainders_authors.max_by{ |k, v| v }.last.to_f
 
-    remainders_commits = remainders_commits.map { |k,r| [k, (r / max_remainders_commits)] }
-    remainders_authors = remainders_authors.map { |k,r| [k, (r / max_remainders_authors)] }
+    remainders_commits = remainders_commits.each { |k,r| remainders_commits[k] = (r / max_remainders_commits) }
+    remainders_authors = remainders_authors.each { |k,r| remainders_authors[k] = (r / max_remainders_authors) }
     ###
     ###
 

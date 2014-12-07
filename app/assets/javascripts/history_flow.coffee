@@ -24,6 +24,8 @@ class window.HistoryFlow
     blame_data = data.blame_data
     history_data = data.history_data
     filtered_data = blame_data
+    remainders_data = data.remainders_data
+    console.log remainders_data
 
     redraw = ->
       temp_data = filtered_data
@@ -253,19 +255,39 @@ class window.HistoryFlow
             util.author_color(d.author_number)
           else
             util.color(blame_data.length - i))
+        .style("stroke", "black")
         .attr("width", x.rangeBand())
-        .attr("height", SCALE_HANDLE_HEIGHT)
+        .attr("height", (d) =>
+          console.log d
+          height = (remainders_data.commits[d.commit_id] || 0) * SCALE_HANDLE_HEIGHT
+          console.log remainders_data.commits[d.commit_id]
+          return height)
         .attr("y", 0)
-        .attr("transform", (d) -> "translate(#{x(d.commit_id)}, 0)")
+        .attr("transform", (d) ->
+          height = (remainders_data.commits[d.commit_id] || 0) * SCALE_HANDLE_HEIGHT
+          y_translate = SCALE_HANDLE_HEIGHT - height
+          return "translate(#{x(d.commit_id)}, #{y_translate})")
         .on("mouseover", (d) ->
           d3.select(this).classed("hover_block", true)
           d3.select(".hf_commit.commit_#{d.commit_id}").classed("hover_block", true)
           commit_info = history_data.history[history_data.history.length - d.commit_number]
-          sidebar_info.setInfo(commit_info))
+          sidebar_info.setInfo(commit_info)
+          svg
+            .selectAll(".hf_blame")
+            .filter((blame) -> blame.commit_id != d.commit_id)
+            .transition()
+            .duration(OPACITY_DURATION)
+            .attr("opacity", 0.2))
         .on("mouseout", (d) ->
           d3.select(this).classed("hover_block", false)
           d3.select(".hf_commit.commit_#{d.commit_id}").classed("hover_block", false)
-          sidebar_info.removeInfo())
+          sidebar_info.removeInfo()
+          svg
+            .selectAll(".hf_blame")
+            .filter((blame) -> blame.commit_id != d.commit_id)
+            .transition()
+            .duration(OPACITY_DURATION)
+            .attr("opacity", 1))
         .on("click", (d, i) ->
           if d3.select(this).classed("selected_block")
             d3.select(this).classed("selected_block", false)
