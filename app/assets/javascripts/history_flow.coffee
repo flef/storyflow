@@ -250,6 +250,11 @@ class window.HistoryFlow
         .transition()
         .attr("width", x.rangeBand())
 
+      if (@state == "ENLARGED")
+        $("#hf_scale_handle_container").hide()
+      else
+        $("#hf_scale_handle_container").show()
+
       scale_g = hf_scale_handle
         .enter()
         .append("g")
