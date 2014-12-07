@@ -259,10 +259,13 @@ class window.HistoryFlow
         .attr("transform", (d) -> "translate(#{x(d.commit_id)}, 0)")
         .on("mouseover", (d) ->
           d3.select(this).classed("hover_block", true)
-          d3.select(".hf_commit.commit_#{d.commit_id}").classed("hover_block", true))
+          d3.select(".hf_commit.commit_#{d.commit_id}").classed("hover_block", true)
+          commit_info = history_data.history[history_data.history.length - d.commit_number]
+          sidebar_info.setInfo(commit_info))
         .on("mouseout", (d) ->
           d3.select(this).classed("hover_block", false)
-          d3.select(".hf_commit.commit_#{d.commit_id}").classed("hover_block", false))
+          d3.select(".hf_commit.commit_#{d.commit_id}").classed("hover_block", false)
+          sidebar_info.removeInfo())
         .on("click", (d, i) ->
           if d3.select(this).classed("selected_block")
             d3.select(this).classed("selected_block", false)
