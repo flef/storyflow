@@ -298,6 +298,7 @@ class window.HistoryFlow
         .on("click", (d, i) ->
           if d3.select(this).classed("selected_block")
             d3.select(this).classed("selected_block", false)
+            selected_index = null
           else
             d3.select(this).classed("selected_block", true)
             
