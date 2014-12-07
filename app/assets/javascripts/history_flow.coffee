@@ -13,24 +13,48 @@ IDLE_OPACITY = 0.2
 
 class window.HistoryFlow
   state: "NORMAL"
-  menu_item: "AUTHOR"
+  menu_item: "HISTORY"
   data: null
 
   constructor: (data) ->
     console.log data
+
+    selected_index = null
+
     blame_data = data.blame_data
     history_data = data.history_data
+    filtered_data = blame_data
+
+    redraw = ->
+      temp_data = filtered_data
+      filtered_data = []
+      updater()
+      filtered_data = temp_data
+      updater()
 
     WIDTH = $("#history_flow").width()
     HEIGHT = $("#history_flow").height()
+
+    $("#history-toggle").click (e) =>
+      $(e.target).addClass("btn-danger")
+      $("#author-toggle").removeClass("btn-danger")
+      @menu_item = "HISTORY"
+      redraw()
+      $("#commit_information").show()
+      $("#author_information").hide()
+
+    $("#author-toggle").click (e) =>
+      $(e.target).addClass("btn-danger")
+      $("#history-toggle").removeClass("btn-danger")
+      @menu_item = "AUTHOR"
+      redraw()
+      $("#commit_information").hide()
+      $("#author_information").show()
 
     sidebar_info = new SidebarInfo()
     sidebar_info.setAuthorData(data.author_data)
 
     util = new Util(blame_data.length)
-
-    selected_index = null
-    filtered_data = blame_data
 
     x = d3.scale.ordinal().rangeBands([0, WIDTH])
     y = d3.scale.linear().range([0, HEIGHT - SCALE_HANDLE_MARGIN])
@@ -117,9 +141,13 @@ class window.HistoryFlow
 
       cb_blame
         .style("transform", (d, i) -> "translate(0, #{d.y0 * PRE_HEIGHT}px)")
-        .style("background-color", (d) ->
-          bg = d3.rgb(util.color(d.commit_number))
-          return "rgba(#{bg.r}, #{bg.g}, #{bg.b}, 0.2)")
+        .style("background-color", (d) =>
+          if @menu_item is "AUTHOR"
+            bg = d3.rgb(util.author_color(d.author_number))
+            return "rgba(#{bg.r}, #{bg.g}, #{bg.b}, 0.2)"
+          else
+            bg = d3.rgb(util.color(d.commit_number))
+            return "rgba(#{bg.r}, #{bg.g}, #{bg.b}, 0.2)")
 
       cb_blame
         .enter()
@@ -174,10 +202,8 @@ class window.HistoryFlow
               (d, i, a) =>
                 start = null
                 if @menu_item is "AUTHOR"
-                  console.log "AUTHOR"
                   start = d3.rgb(util.author_color(d.author_number))
                 else
-                  console.log "ELSE"
                   start = d3.rgb(util.color(d.commit_number))
 
                 start_str = "rgba(#{start.r}, #{start.g}, #{start.b}, 0.99)"
@@ -300,10 +326,11 @@ class window.HistoryFlow
       hf_blame
         .enter()
         .append("rect")
+        .attr("id", (d) -> "hf_blame_#{d.blame_id}")
         .attr("class", (d) -> "hf_blame hf_blame_block_#{d.commit_id}")
         .style("fill", (d) =>
           if @menu_item is "AUTHOR"
-            console.log d.blame_id, d.author_number
+            #console.log d.blame_id, d.author_number
             util.author_color(d.author_number)
           else
             util.color(d.commit_number))
@@ -315,11 +342,11 @@ class window.HistoryFlow
         .attr("height", (d) -> y(d.y0 + d.lines) - y(d.y0))
 
       hf_blame
-        .on("mouseover", (d, i) ->
+        .on("mouseover", (d, i) =>
           commit_info = history_data.history[d.commit_number]
           sidebar_info.setInfo(commit_info)
 
-          d3.select(this).classed("hover_block", true)
+          d3.select("#hf_blame_#{d.blame_id}").classed("hover_block", true)
           svg
             .selectAll(".hf_blame")
             .filter((blame) -> blame.commit_id != d.commit_id)
@@ -336,15 +363,20 @@ class window.HistoryFlow
             .transition()
             .duration(OPACITY_DURATION)
             .styleTween("background-color",
-              (d, i, a) ->
-                start = d3.rgb(util.color(d.commit_number))
+              (d, i, a) =>
+                start = null
+                if @menu_item is "AUTHOR"
+                  start = d3.rgb(util.author_color(d.author_number))
+                else
+                  start = d3.rgb(util.color(d.commit_number))
+
                 start_str = "rgba(#{start.r}, #{start.g}, #{start.b}, 0.2)"
                 end_str = "rgba(#{start.r}, #{start.g}, #{start.b}, 0.99)"
                 return d3.interpolate(start_str, end_str)))
 
-        .on("mouseout", (d) ->
+        .on("mouseout", (d) =>
           sidebar_info.removeInfo()
-          d3.select(this).classed("hover_block", false)
+          d3.select("#hf_blame_#{d.blame_id}").classed("hover_block", false)
           svg
             .selectAll(".hf_blame")
             .filter((blame) -> blame.commit_id != d.commit_id)
@@ -356,12 +388,16 @@ class window.HistoryFlow
             .transition()
             .duration(OPACITY_DURATION)
             .styleTween("background-color",
-              (d, i, a) ->
-                start = d3.rgb(util.color(d.commit_number))
+              (d, i, a) =>
+                start = null
+                if @menu_item is "AUTHOR"
+                  start = d3.rgb(util.author_color(d.author_number))
+                else
+                  start = d3.rgb(util.color(d.commit_number))
+
                 start_str = "rgba(#{start.r}, #{start.g}, #{start.b}, 0.99)"
                 end_str = "rgba(#{start.r}, #{start.g}, #{start.b}, 0.2)"
-                return d3.interpolate(start_str, end_str)
-            )
+                return d3.interpolate(start_str, end_str))
 
           $("#blame_#{d.blame_id}").removeClass('highlight_blame'))
 

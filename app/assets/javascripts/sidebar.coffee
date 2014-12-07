@@ -107,7 +107,6 @@ class window.Sidebar
             end_str = "rgba(#{start.r}, #{start.g}, #{start.b}, 0.2)"
             return d3.interpolate(start_str, end_str)
         )
-    
     )
 
     $("[data-toggle=offcanvas]").click -> # off-canvas sidebar toggle
@@ -118,12 +117,9 @@ class window.Sidebar
       $("#xs-menu").toggleClass("visible-xs").toggleClass "hidden-xs"
       $("#btnShow").toggle()
 
-    #$(".menu").on "click", (e) ->
-      #commit = e.target.className.split(" ")[1]
-      #$("##{commit}").hide()
-
     $("#menu-toggle").click (e) ->
       e.preventDefault()
       $("#wrapper").toggleClass("toggled")
+
 
     #$("#menu-toggle").trigger("click")

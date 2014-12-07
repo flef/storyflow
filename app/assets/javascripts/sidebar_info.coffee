@@ -14,14 +14,17 @@ class window.SidebarInfo
     $("#commit_info_message > p").html("")
 
   setAuthorData: (author) ->
-    for k, v of author
-      console.log k, v
-      author_number = v
+    for author_name, author_data of author
+      console.log author_name, author_data
+      author_number = author_data.author_num
 
       $("#author_information").append("
       <div class='author_color'>
         <div class='author_info'>
-          #{k}, #{v}
+          <img class='menu_gravatar img-rounded'
+            src='https://github.com/identicons/#{author_data.gravatar}.png'
+            title='#{author_name}'/>
+          <span class='author_name'> #{author_name} </span>
         </div>
         <div class='author_color_tab'
           style='background-color:#{@util.author_color(author_number)}'>

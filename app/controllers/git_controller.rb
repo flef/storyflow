@@ -37,7 +37,7 @@ class GitController < ApplicationController
       commitHashTable[c.id] = { commit_index: commit_i, commit: c }
 
       unless authorHashTable[c.author_name]
-        authorHashTable[c.author_name] = author_num
+        authorHashTable[c.author_name] = { author_num: author_num, author_gravatar: "hello" }
         author_num += 1
       end
 
@@ -54,13 +54,13 @@ class GitController < ApplicationController
           final_line: b[:final_start_line_number],
           orig_line: b[:orig_start_line_number],
           lines: b[:lines_in_hunk],
-          author_number: authorHashTable[ commitHashTable[b[:orig_commit_id]][:commit].author_name ]
+          author_number: authorHashTable[ commitHashTable[b[:orig_commit_id]][:commit].author_name ][:author_num]
         }
       end
 
       {commit_id: c.id[0..7], 
        blame_content_array: blame_content_array,
-       author_number: authorHashTable[c.author_name]}
+       author_number: authorHashTable[c.author_name][:author_num]}
     end
 
     blame_data = blame_data.reverse
