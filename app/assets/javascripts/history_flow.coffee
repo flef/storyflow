@@ -307,11 +307,28 @@ class window.HistoryFlow
               filtered_data = filtered_data.slice(range[0], range[1] + 1)
 
               d3.selectAll(".hf_scale_handle").classed("selected_block", false)
+              d3.selectAll(".hf_blame").attr("opacity", 1)
               selected_index = null
 
               updater()
             else
               selected_index = i)
+        .on("dblclick", (d) =>
+          selected_index = null
+          console.log "dblclick!"
+          console.log d
+
+          if @state is "NORMAL"
+            filtered_data = blame_data.map((commit_block) -> {
+              commit_id: commit_block.commit_id,
+              blame_content_array: commit_block.blame_content_array.filter((obj) ->
+                obj.commit_id == d.commit_id)
+            }).filter (commit_block) -> commit_block.blame_content_array.length != 0
+
+            @state = "ENLARGED"
+            updater()
+        )
+
 
       scale_g
         .append("rect")
@@ -322,10 +339,11 @@ class window.HistoryFlow
       scale_g
         .append("rect")
         .style("fill", (d, i) =>
+          #console.log d, i
           if @menu_item is "AUTHOR"
             util.author_color(d.author_number)
           else
-            util.color(blame_data.length - i))
+            util.color(d.commit_number))
         .style("stroke", "black")
         .attr("width", x.rangeBand())
         .attr("height", (d) => (remainders_data.commits[d.commit_id] || 0) * SCALE_HANDLE_HEIGHT)
