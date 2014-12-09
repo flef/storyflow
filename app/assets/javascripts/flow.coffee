@@ -43,7 +43,7 @@ class window.SankeyFlow
         .data(d3.entries(@data))
         .enter()
           .append("svg")
-          .style("left", (d, i) -> (i * (MARGIN + BLOCK_WIDTH) - MARGIN) + "px")
+          .style("left", (d, i) -> ((i + 1) * (MARGIN + BLOCK_WIDTH) - MARGIN) + "px")
           .attr("width", MARGIN)
           .attr("height", "3000px")
           .attr("class", "svg_container")
@@ -54,7 +54,11 @@ class window.SankeyFlow
             .append("path")
             .attr("class", "link")
             .attr("d", path)
-            .attr("data-info", (d) -> d.info)
+            .attr("data-info", 
+              (d) -> 
+                console.log d.info
+                d.info
+              )
             .style("stroke-width", 
              (d) ->
                (lineHeight) * d.lines_number

@@ -28,45 +28,54 @@ class GitController < ApplicationController
     commitHashTable = {}
     links = {}
     previousBlames = {}
+    followingBlames = {}
 
 
-  commits.each_with_index do |c, commit_i|
-        links[commit_i] = []
-        logger.info c.committed_date.inspect
-       
-        blob = Gitlab::Git::Blob.find(repo, c.id, FilePath) 
-        blame = Rugged::Blame.new(repo.rugged, FilePath, { newest_commit: c.id })
+  commits.reverse.each_with_index do |c, commit_i|
+      links[commits.length - commit_i - 1] = []
+      logger.info c.committed_date.inspect
+     
+      blob = Gitlab::Git::Blob.find(repo, c.id, FilePath) 
+      blame = Rugged::Blame.new(repo.rugged, FilePath, { newest_commit: c.id })
 
-        blame.each_with_index do |b, blame_i|
-          blameOrigCommitID = b[:final_commit_id]
-          if previousBlames[blameOrigCommitID]
-            previousBlames[blameOrigCommitID].each do |prevB|
-              link = {}              
-              link[:src] = prevB[:id]
-              link[:dst] = "#{commits.length - commit_i - 1}_#{blame_i}"
-              link[:lines_number] = prevB[:lines_in_hunk]
-              link[:start_line_number] = (prevB[:start_line_number] - b[:final_start_line_number]).abs
-              if (prevB[:start_line_number] - b[:final_start_line_number]).abs <= b[:lines_in_hunk]
-                links[commit_i] << link
-                logger.info link.inspect
-              end
+      logger.info "Commit #{commit_i} :".inspect
+
+      blame.each_with_index do |b, blame_i|
+        logger.info "Blame #{blame_i} :".inspect
+        blameOrigCommitID = b[:final_commit_id]
+        if followingBlames[blameOrigCommitID]
+          followingBlames[blameOrigCommitID].each do |followB|
+            link = {}              
+            link[:src] = "#{commit_i}_#{blame_i}"
+            link[:dst] = followB[:id]
+            link[:lines_number] = b[:lines_in_hunk]
+            link[:start_line_number] = (followB[:start_line_number] - b[:orig_start_line_number]).abs
+            
+            if b[:orig_start_line_number] == followB[:start_line_number] ||
+              followB[:lines_in_hunk] - b[:final_start_line_number] >= followB[:start_line_number]
+              
+              link[:info] = link.inspect
+              links[commits.length - commit_i - 1] << link
+              logger.info link.inspect
             end
           end
         end
-
-        
-
-        previousBlames = {}
-        blame.each_with_index do |b, blame_i|
-          blameOrigCommitID = b[:final_commit_id]
-          if blameOrigCommitID != c.id
-            previousBlames[blameOrigCommitID] = previousBlames[blameOrigCommitID] || []
-            previousBlames[blameOrigCommitID] << {id: "#{commits.length - commit_i - 1}_#{blame_i}", lines_in_hunk: b[:lines_in_hunk], start_line_number: b[:final_start_line_number] }
-          end 
-        end
       end
 
-
+      logger.info "Recording previous blame on #{commit_i} :".inspect
+      followingBlames = {}
+      blame.each_with_index do |b, blame_i|
+        blameOrigCommitID = b[:final_commit_id]
+#        if blameOrigCommitID != c.id
+          logger.info "Record blame #{blame_i} (commit #{commit_i})".inspect
+          followingBlames[blameOrigCommitID] = followingBlames[blameOrigCommitID] || []
+          followingBlames[blameOrigCommitID] << {id: "#{commit_i}_#{blame_i}",
+                                                  lines_in_hunk: b[:lines_in_hunk], 
+                                                  start_line_number: b[:final_start_line_number] 
+                                                }
+#        end 
+      end
+    end
 
 
     blame_data = commits.reverse.each_with_index.map do |c, commit_i|
